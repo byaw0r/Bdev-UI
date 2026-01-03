@@ -53,6 +53,7 @@ function BdevLib:CreateWindow(options)
     Dev.BorderSizePixel = 0
     Dev.Size = UDim2.new(0, 96, 0, 37)
 
+    -- Исправленный шрифт для заголовка
     TextLabel.Parent = Dev
     TextLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     TextLabel.BackgroundTransparency = 1.000
@@ -60,12 +61,13 @@ function BdevLib:CreateWindow(options)
     TextLabel.BorderSizePixel = 0
     TextLabel.Position = UDim2.new(0.0729166642, 0, 0, 0)
     TextLabel.Size = UDim2.new(0, 86, 0, 37)
-    TextLabel.Font = Enum.Font.FredokaOne
+    TextLabel.Font = Enum.Font.Fondamento -- Изменено на Fondamento
     TextLabel.Text = options.Name or "Bdev Library"
     TextLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
-    TextLabel.TextSize = 16.000
+    TextLabel.TextSize = 30.000 -- Изменено на 30
     TextLabel.TextXAlignment = Enum.TextXAlignment.Left
     TextLabel.TextStrokeTransparency = 0
+    TextLabel.FontFace = Font.new("rbxasset://fonts/families/Fondamento.json", Enum.FontWeight.Bold) -- Жирный шрифт
 
     Window.Name = "Window"
     Window.Parent = Main
@@ -220,6 +222,7 @@ function BdevLib:CreateWindow(options)
         UICorner_6.CornerRadius = UDim.new(1, 0)
         UICorner_6.Parent = ClickBtn
 
+        -- Исправленный шрифт для текста кнопки
         FunText.Name = "FunText"
         FunText.Parent = ClickBtn
         FunText.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -228,12 +231,12 @@ function BdevLib:CreateWindow(options)
         FunText.BorderSizePixel = 0
         FunText.Position = UDim2.new(-3.75347257, 0, -0.0389612354, 0)
         FunText.Size = UDim2.new(0, 72, 0, 20)
-        FunText.Font = Enum.Font.SourceSans
+        FunText.Font = Enum.Font.Jura -- Изменено на Jura
         FunText.Text = options.Name or "Click"
         FunText.TextColor3 = Color3.fromRGB(255, 255, 255)
-        FunText.TextScaled = true
-        FunText.TextSize = 16.000
+        FunText.TextSize = 16.000 -- Установлен размер 16
         FunText.TextWrapped = true
+        FunText.FontFace = Font.new("rbxasset://fonts/families/Jura.json", Enum.FontWeight.Bold) -- Жирный шрифт
 
         -- Callback функция
         ClickBtn.MouseButton1Click:Connect(function()
@@ -304,12 +307,16 @@ function BdevLib:CreateWindow(options)
         Circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
         Circle.BorderColor3 = Color3.fromRGB(0, 0, 0)
         Circle.BorderSizePixel = 0
-        Circle.Position = toggled and UDim2.new(1.4375 - 1, 0, 0, 0) or UDim2.new(0, 0, 0, 0)
+        
+        -- ИСПРАВЛЕНИЕ: Используем правильные значения для позиции круга
+        -- Ширина Background: 39, ширина Circle: 16, разница: 39 - 16 = 23
+        Circle.Position = toggled and UDim2.new(23/39, 0, 0, 0) or UDim2.new(0, 0, 0, 0)
         Circle.Size = UDim2.new(0, 16, 0, 16)
 
         UICorner_5.CornerRadius = UDim.new(1, 2)
         UICorner_5.Parent = Circle
 
+        -- Исправленный шрифт для текста переключателя
         NameFunction.Name = "NameFunction"
         NameFunction.Parent = ToggleBtn
         NameFunction.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -318,17 +325,18 @@ function BdevLib:CreateWindow(options)
         NameFunction.BorderSizePixel = 0
         NameFunction.Position = UDim2.new(-3.63162947, 0, -0.125, 0)
         NameFunction.Size = UDim2.new(0, 72, 0, 20)
-        NameFunction.Font = Enum.Font.SourceSans
+        NameFunction.Font = Enum.Font.Jura -- Изменено на Jura
         NameFunction.Text = options.Name or "Toggle"
         NameFunction.TextColor3 = Color3.fromRGB(255, 255, 255)
-        NameFunction.TextScaled = true
-        NameFunction.TextSize = 16.000
+        NameFunction.TextSize = 16.000 -- Установлен размер 16
         NameFunction.TextWrapped = true
+        NameFunction.FontFace = Font.new("rbxasset://fonts/families/Jura.json", Enum.FontWeight.Bold) -- Жирный шрифт
 
         -- Функция переключения
         local function updateToggle()
             if toggled then
-                Circle.Position = UDim2.new(1.4375 - 1, 0, 0, 0)
+                -- ИСПРАВЛЕНИЕ: Используем правильное вычисление позиции
+                Circle.Position = UDim2.new(23/39, 0, 0, 0)
                 Background.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
             else
                 Circle.Position = UDim2.new(0, 0, 0, 0)
