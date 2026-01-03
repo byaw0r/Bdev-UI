@@ -29,7 +29,7 @@ function BdevLib:CreateWindow(options)
     Main.BorderColor3 = Color3.fromRGB(0, 0, 0)
     Main.BorderSizePixel = 0
     Main.Size = UDim2.new(0, 193, 0, 242)
-    Main.Position = UDim2.new(0.5, -96.5, 0.5, -121) -- Центрирование по середине экрана
+    Main.Position = UDim2.new(0.5, -96.5, 0.5, -121)
     Main.Visible = false
 
     UICorner.CornerRadius = UDim.new(0, 9)
@@ -53,7 +53,7 @@ function BdevLib:CreateWindow(options)
     Dev.BorderSizePixel = 0
     Dev.Size = UDim2.new(0, 193, 0, 37)
 
-    -- ИСПРАВЛЕННЫЙ шрифт для заголовка
+    -- Шрифт Jura для заголовка
     TextLabel.Parent = Dev
     TextLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     TextLabel.BackgroundTransparency = 1.000
@@ -61,14 +61,14 @@ function BdevLib:CreateWindow(options)
     TextLabel.BorderSizePixel = 0
     TextLabel.Position = UDim2.new(0.1, 0, 0, 0)
     TextLabel.Size = UDim2.new(0.8, 0, 1, 0)
-    TextLabel.Font = Enum.Font.Fondamento
+    TextLabel.Font = Enum.Font.Jura
     TextLabel.Text = options.Name or "Bdev Library"
     TextLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
     TextLabel.TextSize = 30
     TextLabel.TextXAlignment = Enum.TextXAlignment.Center
-    TextLabel.FontFace = Font.new("rbxasset://fonts/families/Fondamento.json", Enum.FontWeight.Bold)
+    TextLabel.FontFace = Font.new("rbxasset://fonts/families/Jura.json", Enum.FontWeight.Bold)
     TextLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-    TextLabel.TextStrokeTransparency = 0.7 -- Чуть прозрачный обвод для лучшей читаемости
+    TextLabel.TextStrokeTransparency = 0.7
 
     Window.Name = "Window"
     Window.Parent = Main
@@ -92,12 +92,13 @@ function BdevLib:CreateWindow(options)
     Open.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     Open.BorderColor3 = Color3.fromRGB(0, 0, 0)
     Open.BorderSizePixel = 0
-    Open.Position = UDim2.new(0.05, 0, 0.05, 0) -- Позиция в верхнем левом углу
+    Open.Position = UDim2.new(0.05, 0, 0.05, 0)
     Open.Size = UDim2.new(0, 51, 0, 50)
-    Open.Font = Enum.Font.SourceSans
-    Open.Text = ""
-    Open.TextColor3 = Color3.fromRGB(0, 0, 0)
+    Open.Font = Enum.Font.Jura
+    Open.Text = "OPEN"
+    Open.TextColor3 = Color3.fromRGB(255, 255, 255)
     Open.TextSize = 14.000
+    Open.FontFace = Font.new("rbxasset://fonts/families/Jura.json", Enum.FontWeight.Bold)
 
     UICorner_7.CornerRadius = UDim.new(1.5, 0)
     UICorner_7.Parent = Open
@@ -182,6 +183,13 @@ function BdevLib:CreateWindow(options)
     Open.MouseButton1Click:Connect(function()
         isOpen = not isOpen
         Main.Visible = isOpen
+        
+        -- Меняем текст кнопки в зависимости от состояния
+        if isOpen then
+            Open.Text = "CLOSE"
+        else
+            Open.Text = "OPEN"
+        end
     end)
 
     -- Функция для создания кнопки
@@ -215,15 +223,16 @@ function BdevLib:CreateWindow(options)
         ClickBtn.BorderSizePixel = 0
         ClickBtn.Position = UDim2.new(0.604651153, 0, 0.111111112, 0)
         ClickBtn.Size = UDim2.new(0, 38, 0, 22)
-        ClickBtn.Font = Enum.Font.SourceSans
-        ClickBtn.Text = ""
+        ClickBtn.Font = Enum.Font.Jura
+        ClickBtn.Text = "GO"
         ClickBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
-        ClickBtn.TextSize = 14.000
+        ClickBtn.TextSize = 14
+        ClickBtn.FontFace = Font.new("rbxasset://fonts/families/Jura.json", Enum.FontWeight.Bold)
 
         UICorner_6.CornerRadius = UDim.new(1, 0)
         UICorner_6.Parent = ClickBtn
 
-        -- Исправленный шрифт для текста кнопки
+        -- Шрифт Jura для текста кнопки
         FunText.Name = "FunText"
         FunText.Parent = Button
         FunText.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -285,10 +294,11 @@ function BdevLib:CreateWindow(options)
         ToggleBtn.BorderSizePixel = 0
         ToggleBtn.Position = UDim2.new(0.604651153, 0, 0, 0)
         ToggleBtn.Size = UDim2.new(0, 39, 0, 16)
-        ToggleBtn.Font = Enum.Font.SourceSans
+        ToggleBtn.Font = Enum.Font.Jura
         ToggleBtn.Text = ""
         ToggleBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
         ToggleBtn.TextSize = 14.000
+        ToggleBtn.FontFace = Font.new("rbxasset://fonts/families/Jura.json", Enum.FontWeight.Regular)
 
         UICorner_3.CornerRadius = UDim.new(1, 2)
         UICorner_3.Parent = ToggleBtn
@@ -310,14 +320,13 @@ function BdevLib:CreateWindow(options)
         Circle.BorderColor3 = Color3.fromRGB(0, 0, 0)
         Circle.BorderSizePixel = 0
         
-        -- ИСПРАВЛЕНИЕ: Используем правильные значения для позиции круга
         Circle.Position = toggled and UDim2.new(0.59, 0, 0, 0) or UDim2.new(0, 0, 0, 0)
         Circle.Size = UDim2.new(0.41, 0, 1, 0)
 
         UICorner_5.CornerRadius = UDim.new(1, 2)
         UICorner_5.Parent = Circle
 
-        -- Исправленный шрифт для текста переключателя
+        -- Шрифт Jura для текста переключателя
         NameFunction.Name = "NameFunction"
         NameFunction.Parent = Tbutton
         NameFunction.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
