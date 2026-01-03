@@ -29,10 +29,7 @@ function BdevLib:CreateWindow(options)
     Main.BorderColor3 = Color3.fromRGB(0, 0, 0)
     Main.BorderSizePixel = 0
     Main.Size = UDim2.new(0, 193, 0, 242)
-    
-    -- ИСПРАВЛЕННАЯ ПОЗИЦИЯ: центрирование по середине экрана
-    Main.Position = UDim2.new(0.5, -193/2, 0.5, -242/2) -- Автоматический расчет центра
-    Main.AnchorPoint = Vector2.new(0.5, 0.5) -- Центрирование от центра окна
+    Main.Position = UDim2.new(0.5, -96.5, 0.5, -121) -- Центрирование по середине экрана
     Main.Visible = false
 
     UICorner.CornerRadius = UDim.new(0, 9)
@@ -56,7 +53,7 @@ function BdevLib:CreateWindow(options)
     Dev.BorderSizePixel = 0
     Dev.Size = UDim2.new(0, 193, 0, 37)
 
-    -- ИСПРАВЛЕННЫЙ шрифт для заголовка на Jura
+    -- ИСПРАВЛЕННЫЙ шрифт для заголовка
     TextLabel.Parent = Dev
     TextLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     TextLabel.BackgroundTransparency = 1.000
@@ -64,12 +61,12 @@ function BdevLib:CreateWindow(options)
     TextLabel.BorderSizePixel = 0
     TextLabel.Position = UDim2.new(0.1, 0, 0, 0)
     TextLabel.Size = UDim2.new(0.8, 0, 1, 0)
-    TextLabel.Font = Enum.Font.Jura -- Изменено на Jura
+    TextLabel.Font = Enum.Font.Fondamento
     TextLabel.Text = options.Name or "Bdev Library"
     TextLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
-    TextLabel.TextSize = 22 -- Немного уменьшен размер для лучшего отображения в Jura
+    TextLabel.TextSize = 30
     TextLabel.TextXAlignment = Enum.TextXAlignment.Center
-    TextLabel.FontFace = Font.new("rbxasset://fonts/families/Jura.json", Enum.FontWeight.Bold) -- Исправленный шрифт
+    TextLabel.FontFace = Font.new("rbxasset://fonts/families/Fondamento.json", Enum.FontWeight.Bold)
     TextLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
     TextLabel.TextStrokeTransparency = 0.7 -- Чуть прозрачный обвод для лучшей читаемости
 
