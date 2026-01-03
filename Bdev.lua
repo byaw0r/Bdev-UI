@@ -3,7 +3,6 @@ local BdevLib = {}
 -- Основная функция для создания интерфейса
 function BdevLib:CreateWindow(options)
     local window = {}
-    local elements = {}
     
     -- Создаем основной GUI
     local BdevUI = Instance.new("ScreenGui")
@@ -61,11 +60,12 @@ function BdevLib:CreateWindow(options)
     TextLabel.BorderSizePixel = 0
     TextLabel.Position = UDim2.new(0.0729166642, 0, 0, 0)
     TextLabel.Size = UDim2.new(0, 86, 0, 37)
-    TextLabel.Font = Enum.Font.Unknown
+    TextLabel.Font = Enum.Font.FredokaOne
     TextLabel.Text = options.Name or "Bdev Library"
     TextLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
-    TextLabel.TextSize = 14.000
+    TextLabel.TextSize = 16.000
     TextLabel.TextXAlignment = Enum.TextXAlignment.Left
+    TextLabel.TextStrokeTransparency = 0
 
     Window.Name = "Window"
     Window.Parent = Main
@@ -99,6 +99,80 @@ function BdevLib:CreateWindow(options)
     UICorner_7.CornerRadius = UDim.new(1.5, 0)
     UICorner_7.Parent = Open
 
+    -- Функционал перетаскивания для главного окна
+    local draggingMain
+    local dragInputMain
+    local dragStartMain
+    local startPosMain
+    
+    local function updateMain(input)
+        local delta = input.Position - dragStartMain
+        Main.Position = UDim2.new(startPosMain.X.Scale, startPosMain.X.Offset + delta.X, startPosMain.Y.Scale, startPosMain.Y.Offset + delta.Y)
+    end
+    
+    TopBar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            draggingMain = true
+            dragStartMain = input.Position
+            startPosMain = Main.Position
+            
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    draggingMain = false
+                end
+            end)
+        end
+    end)
+    
+    TopBar.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            dragInputMain = input
+        end
+    end)
+    
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if input == dragInputMain and draggingMain then
+            updateMain(input)
+        end
+    end)
+
+    -- Функционал перетаскивания для кнопки открытия
+    local draggingOpen
+    local dragInputOpen
+    local dragStartOpen
+    local startPosOpen
+    
+    local function updateOpen(input)
+        local delta = input.Position - dragStartOpen
+        Open.Position = UDim2.new(startPosOpen.X.Scale, startPosOpen.X.Offset + delta.X, startPosOpen.Y.Scale, startPosOpen.Y.Offset + delta.Y)
+    end
+    
+    Open.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            draggingOpen = true
+            dragStartOpen = input.Position
+            startPosOpen = Open.Position
+            
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    draggingOpen = false
+                end
+            end)
+        end
+    end)
+    
+    Open.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            dragInputOpen = input
+        end
+    end)
+    
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if input == dragInputOpen and draggingOpen then
+            updateOpen(input)
+        end
+    end)
+
     -- Функционал открытия/закрытия
     local isOpen = false
     
@@ -109,9 +183,9 @@ function BdevLib:CreateWindow(options)
 
     -- Функция для создания кнопки
     function window:CreateButton(options)
-        local button = {}
-        
         local Button = Instance.new("Frame")
+        local UIListLayout_2 = Instance.new("UIListLayout")
+        local UIPadding_2 = Instance.new("UIPadding")
         local ClickBtn = Instance.new("TextButton")
         local UICorner_6 = Instance.new("UICorner")
         local FunText = Instance.new("TextLabel")
@@ -123,6 +197,13 @@ function BdevLib:CreateWindow(options)
         Button.BorderColor3 = Color3.fromRGB(0, 0, 0)
         Button.BorderSizePixel = 0
         Button.Size = UDim2.new(0, 172, 0, 27)
+
+        UIListLayout_2.Parent = Button
+        UIListLayout_2.SortOrder = Enum.SortOrder.LayoutOrder
+        UIListLayout_2.Padding = UDim.new(0, 12)
+
+        UIPadding_2.Parent = Button
+        UIPadding_2.PaddingLeft = UDim.new(0.800000012, -12)
 
         ClickBtn.Name = "ClickBtn"
         ClickBtn.Parent = Button
@@ -140,20 +221,19 @@ function BdevLib:CreateWindow(options)
         UICorner_6.Parent = ClickBtn
 
         FunText.Name = "FunText"
-        FunText.Parent = Button
+        FunText.Parent = ClickBtn
         FunText.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
         FunText.BackgroundTransparency = 1.000
         FunText.BorderColor3 = Color3.fromRGB(0, 0, 0)
         FunText.BorderSizePixel = 0
-        FunText.Position = UDim2.new(0, 0, 0.111111112, 0)
-        FunText.Size = UDim2.new(0, 100, 0, 20)
-        FunText.Font = Enum.Font.SourceSansBold
-        FunText.Text = options.Name or "Button"
+        FunText.Position = UDim2.new(-3.75347257, 0, -0.0389612354, 0)
+        FunText.Size = UDim2.new(0, 72, 0, 20)
+        FunText.Font = Enum.Font.SourceSans
+        FunText.Text = options.Name or "Click"
         FunText.TextColor3 = Color3.fromRGB(255, 255, 255)
         FunText.TextScaled = true
         FunText.TextSize = 16.000
         FunText.TextWrapped = true
-        FunText.TextXAlignment = Enum.TextXAlignment.Left
 
         -- Callback функция
         ClickBtn.MouseButton1Click:Connect(function()
@@ -161,22 +241,13 @@ function BdevLib:CreateWindow(options)
                 options.Callback()
             end
         end)
-
-        -- Функции для управления кнопкой
-        function button:SetText(text)
-            FunText.Text = text
-        end
-
-        table.insert(elements, Button)
-        return button
     end
 
     -- Функция для создания переключателя
     function window:CreateToggle(options)
-        local toggle = {}
-        local toggled = options.Default or false
-        
         local Tbutton = Instance.new("Frame")
+        local UIPadding_3 = Instance.new("UIPadding")
+        local UIListLayout_3 = Instance.new("UIListLayout")
         local ToggleBtn = Instance.new("TextButton")
         local UICorner_3 = Instance.new("UICorner")
         local Background = Instance.new("Frame")
@@ -185,6 +256,8 @@ function BdevLib:CreateWindow(options)
         local UICorner_5 = Instance.new("UICorner")
         local NameFunction = Instance.new("TextLabel")
 
+        local toggled = options.Default or false
+
         Tbutton.Name = "Tbutton"
         Tbutton.Parent = Window
         Tbutton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -192,6 +265,13 @@ function BdevLib:CreateWindow(options)
         Tbutton.BorderColor3 = Color3.fromRGB(0, 0, 0)
         Tbutton.BorderSizePixel = 0
         Tbutton.Size = UDim2.new(0, 172, 0, 17)
+
+        UIPadding_3.Parent = Tbutton
+        UIPadding_3.PaddingLeft = UDim.new(0.800000012, -12)
+
+        UIListLayout_3.Parent = Tbutton
+        UIListLayout_3.SortOrder = Enum.SortOrder.LayoutOrder
+        UIListLayout_3.Padding = UDim.new(0, 12)
 
         ToggleBtn.Name = "ToggleBtn"
         ToggleBtn.Parent = Tbutton
@@ -210,7 +290,7 @@ function BdevLib:CreateWindow(options)
 
         Background.Name = "Background"
         Background.Parent = ToggleBtn
-        Background.BackgroundColor3 = toggled and Color3.fromRGB(0, 170, 255) or Color3.fromRGB(0, 0, 0)
+        Background.BackgroundColor3 = toggled and Color3.fromRGB(0, 200, 0) or Color3.fromRGB(60, 60, 60)
         Background.BorderColor3 = Color3.fromRGB(0, 0, 0)
         Background.BorderSizePixel = 0
         Background.Position = UDim2.new(-0.00180601457, 0, 0, 0)
@@ -224,40 +304,35 @@ function BdevLib:CreateWindow(options)
         Circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
         Circle.BorderColor3 = Color3.fromRGB(0, 0, 0)
         Circle.BorderSizePixel = 0
-        Circle.Position = toggled and UDim2.new(1.44 - 1, 0, 0, 0) or UDim2.new(0, 0, 0, 0)
+        Circle.Position = toggled and UDim2.new(1.4375 - 1, 0, 0, 0) or UDim2.new(0, 0, 0, 0)
         Circle.Size = UDim2.new(0, 16, 0, 16)
 
         UICorner_5.CornerRadius = UDim.new(1, 2)
         UICorner_5.Parent = Circle
 
         NameFunction.Name = "NameFunction"
-        NameFunction.Parent = Tbutton
+        NameFunction.Parent = ToggleBtn
         NameFunction.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
         NameFunction.BackgroundTransparency = 1.000
         NameFunction.BorderColor3 = Color3.fromRGB(0, 0, 0)
         NameFunction.BorderSizePixel = 0
-        NameFunction.Position = UDim2.new(0, 0, 0, 0)
-        NameFunction.Size = UDim2.new(0, 100, 0, 16)
-        NameFunction.Font = Enum.Font.SourceSansBold
+        NameFunction.Position = UDim2.new(-3.63162947, 0, -0.125, 0)
+        NameFunction.Size = UDim2.new(0, 72, 0, 20)
+        NameFunction.Font = Enum.Font.SourceSans
         NameFunction.Text = options.Name or "Toggle"
         NameFunction.TextColor3 = Color3.fromRGB(255, 255, 255)
         NameFunction.TextScaled = true
         NameFunction.TextSize = 16.000
         NameFunction.TextWrapped = true
-        NameFunction.TextXAlignment = Enum.TextXAlignment.Left
 
         -- Функция переключения
         local function updateToggle()
-            local tweenInfo = TweenInfo.new(0.1, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut)
-            
             if toggled then
-                local tween = game:GetService("TweenService"):Create(Circle, tweenInfo, {Position = UDim2.new(1.44 - 1, 0, 0, 0)})
-                tween:Play()
-                Background.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+                Circle.Position = UDim2.new(1.4375 - 1, 0, 0, 0)
+                Background.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
             else
-                local tween = game:GetService("TweenService"):Create(Circle, tweenInfo, {Position = UDim2.new(0, 0, 0, 0)})
-                tween:Play()
-                Background.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+                Circle.Position = UDim2.new(0, 0, 0, 0)
+                Background.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
             end
             
             if options.Callback then
@@ -269,208 +344,6 @@ function BdevLib:CreateWindow(options)
             toggled = not toggled
             updateToggle()
         end)
-
-        -- Функции для управления переключателем
-        function toggle:SetValue(value)
-            toggled = value
-            updateToggle()
-        end
-
-        function toggle:GetValue()
-            return toggled
-        end
-
-        table.insert(elements, Tbutton)
-        return toggle
-    end
-
-    -- Функция для создания слайдера
-    function window:CreateSlider(options)
-        local slider = {}
-        local value = options.Default or options.Min or 0
-        
-        local SliderFrame = Instance.new("Frame")
-        local SliderName = Instance.new("TextLabel")
-        local SliderBackground = Instance.new("Frame")
-        local UICorner_8 = Instance.new("UICorner")
-        local SliderFill = Instance.new("Frame")
-        local UICorner_9 = Instance.new("UICorner")
-        local SliderButton = Instance.new("TextButton")
-        local ValueLabel = Instance.new("TextLabel")
-
-        SliderFrame.Name = "SliderFrame"
-        SliderFrame.Parent = Window
-        SliderFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        SliderFrame.BackgroundTransparency = 1.000
-        SliderFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
-        SliderFrame.BorderSizePixel = 0
-        SliderFrame.Size = UDim2.new(0, 172, 0, 40)
-
-        SliderName.Name = "SliderName"
-        SliderName.Parent = SliderFrame
-        SliderName.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        SliderName.BackgroundTransparency = 1.000
-        SliderName.BorderColor3 = Color3.fromRGB(0, 0, 0)
-        SliderName.BorderSizePixel = 0
-        SliderName.Position = UDim2.new(0, 0, 0, 0)
-        SliderName.Size = UDim2.new(0, 172, 0, 15)
-        SliderName.Font = Enum.Font.SourceSansBold
-        SliderName.Text = options.Name or "Slider"
-        SliderName.TextColor3 = Color3.fromRGB(255, 255, 255)
-        SliderName.TextSize = 14.000
-        SliderName.TextXAlignment = Enum.TextXAlignment.Left
-
-        SliderBackground.Name = "SliderBackground"
-        SliderBackground.Parent = SliderFrame
-        SliderBackground.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-        SliderBackground.BorderColor3 = Color3.fromRGB(0, 0, 0)
-        SliderBackground.BorderSizePixel = 0
-        SliderBackground.Position = UDim2.new(0, 0, 0.5, 0)
-        SliderBackground.Size = UDim2.new(0, 172, 0, 5)
-
-        UICorner_8.CornerRadius = UDim.new(1, 0)
-        UICorner_8.Parent = SliderBackground
-
-        SliderFill.Name = "SliderFill"
-        SliderFill.Parent = SliderBackground
-        SliderFill.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-        SliderFill.BorderColor3 = Color3.fromRGB(0, 0, 0)
-        SliderFill.BorderSizePixel = 0
-        SliderFill.Size = UDim2.new((value - (options.Min or 0)) / ((options.Max or 100) - (options.Min or 0)), 0, 1, 0)
-
-        UICorner_9.CornerRadius = UDim.new(1, 0)
-        UICorner_9.Parent = SliderFill
-
-        SliderButton.Name = "SliderButton"
-        SliderButton.Parent = SliderBackground
-        SliderButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        SliderButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
-        SliderButton.BorderSizePixel = 0
-        SliderButton.Position = UDim2.new((value - (options.Min or 0)) / ((options.Max or 100) - (options.Min or 0)), -8, -1.5, 0)
-        SliderButton.Size = UDim2.new(0, 16, 0, 16)
-        SliderButton.Font = Enum.Font.SourceSans
-        SliderButton.Text = ""
-        SliderButton.TextColor3 = Color3.fromRGB(0, 0, 0)
-        SliderButton.TextSize = 14.000
-
-        UICorner_9:Clone().Parent = SliderButton
-
-        ValueLabel.Name = "ValueLabel"
-        ValueLabel.Parent = SliderFrame
-        ValueLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        ValueLabel.BackgroundTransparency = 1.000
-        ValueLabel.BorderColor3 = Color3.fromRGB(0, 0, 0)
-        ValueLabel.BorderSizePixel = 0
-        ValueLabel.Position = UDim2.new(0, 0, 0.75, 0)
-        ValueLabel.Size = UDim2.new(0, 172, 0, 15)
-        ValueLabel.Font = Enum.Font.SourceSans
-        ValueLabel.Text = tostring(value)
-        ValueLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-        ValueLabel.TextSize = 12.000
-        ValueLabel.TextXAlignment = Enum.TextXAlignment.Left
-
-        -- Функция обновления слайдера
-        local function updateSlider()
-            local min = options.Min or 0
-            local max = options.Max or 100
-            local percentage = (value - min) / (max - min)
-            
-            SliderFill.Size = UDim2.new(percentage, 0, 1, 0)
-            SliderButton.Position = UDim2.new(percentage, -8, -1.5, 0)
-            ValueLabel.Text = tostring(math.floor(value * 100) / 100)
-            
-            if options.Callback then
-                options.Callback(value)
-            end
-        end
-
-        -- Drag логика
-        local dragging = false
-        
-        SliderButton.MouseButton1Down:Connect(function()
-            dragging = true
-        end)
-        
-        game:GetService("UserInputService").InputEnded:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 then
-                dragging = false
-            end
-        end)
-        
-        game:GetService("UserInputService").InputChanged:Connect(function(input)
-            if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-                local min = options.Min or 0
-                local max = options.Max or 100
-                local relativeX = input.Position.X - SliderBackground.AbsolutePosition.X
-                local percentage = math.clamp(relativeX / SliderBackground.AbsoluteSize.X, 0, 1)
-                
-                value = min + (max - min) * percentage
-                if options.Precise then
-                    value = math.floor(value)
-                end
-                
-                updateSlider()
-            end
-        end)
-
-        -- Функции для управления слайдером
-        function slider:SetValue(newValue)
-            local min = options.Min or 0
-            local max = options.Max or 100
-            value = math.clamp(newValue, min, max)
-            updateSlider()
-        end
-
-        function slider:GetValue()
-            return value
-        end
-
-        table.insert(elements, SliderFrame)
-        return slider
-    end
-
-    -- Функция для создания метки
-    function window:CreateLabel(options)
-        local label = {}
-        
-        local LabelFrame = Instance.new("Frame")
-        local LabelText = Instance.new("TextLabel")
-
-        LabelFrame.Name = "LabelFrame"
-        LabelFrame.Parent = Window
-        LabelFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        LabelFrame.BackgroundTransparency = 1.000
-        LabelFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
-        LabelFrame.BorderSizePixel = 0
-        LabelFrame.Size = UDim2.new(0, 172, 0, 20)
-
-        LabelText.Name = "LabelText"
-        LabelText.Parent = LabelFrame
-        LabelText.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        LabelText.BackgroundTransparency = 1.000
-        LabelText.BorderColor3 = Color3.fromRGB(0, 0, 0)
-        LabelText.BorderSizePixel = 0
-        LabelText.Size = UDim2.new(1, 0, 1, 0)
-        LabelText.Font = Enum.Font.SourceSansBold
-        LabelText.Text = options.Text or "Label"
-        LabelText.TextColor3 = Color3.fromRGB(255, 255, 255)
-        LabelText.TextSize = 14.000
-        LabelText.TextXAlignment = Enum.TextXAlignment.Left
-
-        function label:SetText(text)
-            LabelText.Text = text
-        end
-
-        table.insert(elements, LabelFrame)
-        return label
-    end
-
-    -- Функция для очистки всех элементов
-    function window:Clear()
-        for _, element in pairs(elements) do
-            element:Destroy()
-        end
-        elements = {}
     end
 
     return window
