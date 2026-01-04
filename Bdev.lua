@@ -12,18 +12,17 @@ function BdevLib:CreateWindow(options)
     local Dev = Instance.new("Frame")
     local TextLabel = Instance.new("TextLabel")
     local Window = Instance.new("Frame")
-    local UIListLayout = Instance.new("UIListLayout")
-    local UIPadding = Instance.new("UIPadding")
     local Open = Instance.new("TextButton")
     local UICorner_7 = Instance.new("UICorner")
 
+    -- Настройка свойств
     BdevUI.Name = "Bdev UI"
     BdevUI.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
     BdevUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
     Main.Name = "Main"
     Main.Parent = BdevUI
-    Main.BackgroundColor3 = Color3.fromRGB(49, 49, 49)
+    Main.BackgroundColor3 = Color3.fromRGB(44, 44, 44)
     Main.BorderColor3 = Color3.fromRGB(0, 0, 0)
     Main.BorderSizePixel = 0
     Main.Position = UDim2.new(0.5, -96.5, 0.5, -121)
@@ -57,13 +56,13 @@ function BdevLib:CreateWindow(options)
     TextLabel.BorderColor3 = Color3.fromRGB(0, 0, 0)
     TextLabel.BorderSizePixel = 0
     TextLabel.Position = UDim2.new(0.0729166642, 0, 0, 0)
-    TextLabel.Size = UDim2.new(0, 86, 0, 37)
-    TextLabel.Font = Enum.Font.Jura
-    TextLabel.Text = options.Name or "Bdev Library"
+    TextLabel.Size = UDim2.new(0, 186, 0, 37)
+    TextLabel.Font = Enum.Font.fromName("Jura", Enum.FontWeight.Bold)
+    TextLabel.Text = options.Name or "Bdev"
     TextLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
-    TextLabel.TextSize = 16.000
+    TextLabel.TextSize = 30.000
+    TextLabel.TextWrapped = true
     TextLabel.TextXAlignment = Enum.TextXAlignment.Left
-    TextLabel.TextStrokeTransparency = 0
 
     Window.Name = "Window"
     Window.Parent = Main
@@ -74,14 +73,6 @@ function BdevLib:CreateWindow(options)
     Window.Position = UDim2.new(0, 0, 0.15289256, 0)
     Window.Size = UDim2.new(0, 193, 0, 205)
 
-    UIListLayout.Parent = Window
-    UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    UIListLayout.Padding = UDim.new(0, 5)
-
-    UIPadding.Parent = Window
-    UIPadding.PaddingTop = UDim.new(0, 5)
-    UIPadding.PaddingLeft = UDim.new(0, 10)
-
     Open.Name = "Open"
     Open.Parent = BdevUI
     Open.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
@@ -89,7 +80,7 @@ function BdevLib:CreateWindow(options)
     Open.BorderSizePixel = 0
     Open.Position = UDim2.new(0.17578125, 0, 0.213219613, 0)
     Open.Size = UDim2.new(0, 51, 0, 50)
-    Open.Font = Enum.Font.Jura
+    Open.Font = Enum.Font.fromName("Jura", Enum.FontWeight.Regular)
     Open.Text = ""
     Open.TextColor3 = Color3.fromRGB(0, 0, 0)
     Open.TextSize = 14.000
@@ -179,7 +170,7 @@ function BdevLib:CreateWindow(options)
         Main.Visible = isOpen
     end)
 
-    -- Функция создания кнопки
+    -- Функция создания кнопки (точная копия вашего оформления)
     function window:CreateButton(options)
         local Button = Instance.new("Frame")
         local UIListLayout_2 = Instance.new("UIListLayout")
@@ -194,7 +185,8 @@ function BdevLib:CreateWindow(options)
         Button.BackgroundTransparency = 1.000
         Button.BorderColor3 = Color3.fromRGB(0, 0, 0)
         Button.BorderSizePixel = 0
-        Button.Size = UDim2.new(0, 172, 0, 27)
+        Button.Position = UDim2.new(0.00420162221, 0, 0.222046345, 0)
+        Button.Size = UDim2.new(0, 192, 0, 27)
 
         UIListLayout_2.Parent = Button
         UIListLayout_2.SortOrder = Enum.SortOrder.LayoutOrder
@@ -208,9 +200,9 @@ function BdevLib:CreateWindow(options)
         ClickBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
         ClickBtn.BorderColor3 = Color3.fromRGB(0, 0, 0)
         ClickBtn.BorderSizePixel = 0
-        ClickBtn.Position = UDim2.new(0.604651153, 0, 0.111111112, 0)
+        ClickBtn.Position = UDim2.new(-6.0550758e-07, 0, 0, 0)
         ClickBtn.Size = UDim2.new(0, 38, 0, 22)
-        ClickBtn.Font = Enum.Font.Jura
+        ClickBtn.Font = Enum.Font.fromName("Jura", Enum.FontWeight.Bold)
         ClickBtn.Text = ""
         ClickBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
         ClickBtn.TextSize = 14.000
@@ -226,7 +218,7 @@ function BdevLib:CreateWindow(options)
         FunText.BorderSizePixel = 0
         FunText.Position = UDim2.new(-3.75347257, 0, -0.0389612354, 0)
         FunText.Size = UDim2.new(0, 72, 0, 20)
-        FunText.Font = Enum.Font.Jura
+        FunText.Font = Enum.Font.fromName("Jura", Enum.FontWeight.Bold)
         FunText.Text = options.Name or "Click"
         FunText.TextColor3 = Color3.fromRGB(255, 255, 255)
         FunText.TextScaled = true
@@ -240,7 +232,7 @@ function BdevLib:CreateWindow(options)
         end)
     end
 
-    -- Функция создания переключателя
+    -- Функция создания переключателя (точная копия вашего оформления)
     function window:CreateToggle(options)
         local Tbutton = Instance.new("Frame")
         local UIPadding_3 = Instance.new("UIPadding")
@@ -261,7 +253,8 @@ function BdevLib:CreateWindow(options)
         Tbutton.BackgroundTransparency = 1.000
         Tbutton.BorderColor3 = Color3.fromRGB(0, 0, 0)
         Tbutton.BorderSizePixel = 0
-        Tbutton.Size = UDim2.new(0, 172, 0, 17)
+        Tbutton.Position = UDim2.new(0, 0, 0.0648648888, 0)
+        Tbutton.Size = UDim2.new(0, 192, 0, 17)
 
         UIPadding_3.Parent = Tbutton
         UIPadding_3.PaddingLeft = UDim.new(0.800000012, -12)
@@ -275,9 +268,9 @@ function BdevLib:CreateWindow(options)
         ToggleBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
         ToggleBtn.BorderColor3 = Color3.fromRGB(0, 0, 0)
         ToggleBtn.BorderSizePixel = 0
-        ToggleBtn.Position = UDim2.new(0.604651153, 0, 0, 0)
+        ToggleBtn.Position = UDim2.new(1.19108284, 0, 0, 0)
         ToggleBtn.Size = UDim2.new(0, 39, 0, 16)
-        ToggleBtn.Font = Enum.Font.Jura
+        ToggleBtn.Font = Enum.Font.fromName("Jura", Enum.FontWeight.Regular)
         ToggleBtn.Text = ""
         ToggleBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
         ToggleBtn.TextSize = 14.000
@@ -301,7 +294,8 @@ function BdevLib:CreateWindow(options)
         Circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
         Circle.BorderColor3 = Color3.fromRGB(0, 0, 0)
         Circle.BorderSizePixel = 0
-        Circle.Position = toggled and UDim2.new(1.4375 - 1, 0, 0, 0) or UDim2.new(0, 0, 0, 0)
+        -- ИСПРАВЛЕНО: Круг полностью перемещается вправо
+        Circle.Position = toggled and UDim2.new(23/39, 0, 0, 0) or UDim2.new(0, 0, 0, 0)
         Circle.Size = UDim2.new(0, 16, 0, 16)
 
         UICorner_5.CornerRadius = UDim.new(1, 2)
@@ -315,7 +309,7 @@ function BdevLib:CreateWindow(options)
         NameFunction.BorderSizePixel = 0
         NameFunction.Position = UDim2.new(-3.63162947, 0, -0.125, 0)
         NameFunction.Size = UDim2.new(0, 72, 0, 20)
-        NameFunction.Font = Enum.Font.Jura
+        NameFunction.Font = Enum.Font.fromName("Jura", Enum.FontWeight.Bold)
         NameFunction.Text = options.Name or "Toggle"
         NameFunction.TextColor3 = Color3.fromRGB(255, 255, 255)
         NameFunction.TextScaled = true
@@ -324,7 +318,8 @@ function BdevLib:CreateWindow(options)
 
         local function updateToggle()
             if toggled then
-                Circle.Position = UDim2.new(1.4375 - 1, 0, 0, 0)
+                -- Круг полностью вправо: 39 (ширина) - 16 (ширина круга) = 23
+                Circle.Position = UDim2.new(23/39, 0, 0, 0)
                 Background.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
             else
                 Circle.Position = UDim2.new(0, 0, 0, 0)
