@@ -18,7 +18,7 @@ function BdevLib:CreateWindow(options)
     local Open = Instance.new("TextButton")
     local UICorner_7 = Instance.new("UICorner")
 
-    -- Настройка свойств из вашего кода
+    -- Настройка свойств из твоего кода
     BdevUI.Name = "Bdev UI"
     BdevUI.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
     BdevUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
@@ -53,7 +53,6 @@ function BdevLib:CreateWindow(options)
     Dev.BorderSizePixel = 0
     Dev.Size = UDim2.new(0, 96, 0, 37)
 
-    -- Шрифт для заголовка остается неизменным
     TextLabel.Parent = Dev
     TextLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     TextLabel.BackgroundTransparency = 1.000
@@ -80,11 +79,11 @@ function BdevLib:CreateWindow(options)
 
     UIListLayout.Parent = Window
     UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    UIListLayout.Padding = UDim.new(0, 5)
+    UIListLayout.Padding = UDim.new(0, 12)
 
     UIPadding.Parent = Window
     UIPadding.PaddingTop = UDim.new(0, 5)
-    UIPadding.PaddingLeft = UDim.new(0, 10)
+    UIPadding.PaddingLeft = UDim.new(0.8, -12)
 
     Open.Name = "Open"
     Open.Parent = BdevUI
@@ -222,14 +221,14 @@ function BdevLib:CreateWindow(options)
         UICorner_6.CornerRadius = UDim.new(1, 0)
         UICorner_6.Parent = ClickBtn
 
-        -- Шрифт для текста кнопки остается неизменным
+        -- Текст кнопки с твоей позицией
         FunText.Name = "FunText"
         FunText.Parent = ClickBtn
         FunText.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
         FunText.BackgroundTransparency = 1.000
         FunText.BorderColor3 = Color3.fromRGB(0, 0, 0)
         FunText.BorderSizePixel = 0
-        FunText.Position = UDim2.new(-3.75347257, 0, -0.0389612354, 0)
+        FunText.Position = UDim2.new(-3.56926203, 0, -0.0389612354, 0)
         FunText.Size = UDim2.new(0, 72, 0, 20)
         FunText.Font = Enum.Font.Jura
         FunText.Text = options.Name or "Click"
@@ -310,20 +309,20 @@ function BdevLib:CreateWindow(options)
         Circle.BorderSizePixel = 0
         Circle.Size = UDim2.new(0, 16, 0, 16)
         
-        -- ИСПРАВЛЕНИЕ: Позиция круга в зависимости от состояния
+        -- Позиция круга в зависимости от состояния
         Circle.Position = toggled and UDim2.new(0.59, 0, 0, 0) or UDim2.new(0, 0, 0, 0)
 
         UICorner_5.CornerRadius = UDim.new(1, 2)
         UICorner_5.Parent = Circle
 
-        -- Шрифт для текста переключателя остается неизменным
+        -- Текст переключателя с твоей позицией
         NameFunction.Name = "NameFunction"
         NameFunction.Parent = ToggleBtn
         NameFunction.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
         NameFunction.BackgroundTransparency = 1.000
         NameFunction.BorderColor3 = Color3.fromRGB(0, 0, 0)
         NameFunction.BorderSizePixel = 0
-        NameFunction.Position = UDim2.new(-3.63162947, 0, -0.125, 0)
+        NameFunction.Position = UDim2.new(-3.4777832, 0, -0.125, 0)
         NameFunction.Size = UDim2.new(0, 72, 0, 20)
         NameFunction.Font = Enum.Font.Jura
         NameFunction.Text = options.Name or "Toggle"
