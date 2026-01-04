@@ -271,10 +271,10 @@ function BdevLib:CreateWindow(options)
             end
         end
         
-        -- Для ПК: MouseButton1Click (самый надежный способ)
+        -- Для ПК: MouseButton1Click
         ClickBtn.MouseButton1Click:Connect(handleButtonClick)
         
-        -- Для мобильных: простой тап без сложных проверок
+        -- Для мобильных: простой тап
         ClickBtn.InputBegan:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.Touch then
                 -- Визуальная обратная связь
@@ -314,8 +314,6 @@ function BdevLib:CreateWindow(options)
         local NameFunction = Instance.new("TextLabel")
 
         local toggled = options.Default or false
-        local isDragging = false
-        local dragStartTime = 0
 
         Tbutton.Name = "Tbutton"
         Tbutton.Parent = Window
@@ -430,42 +428,23 @@ function BdevLib:CreateWindow(options)
             updateToggle()
         end
 
-        -- ОСНОВНОЕ ИСПРАВЛЕНИЕ: Простой обработчик клика
+        -- ПРОСТОЙ ОБРАБОТЧИК КЛИКА - только это
         ToggleBtn.MouseButton1Click:Connect(toggleFunction)
         
-        -- Также для мобильных устройств
+        -- Для мобильных: также простой тап
         ToggleBtn.InputBegan:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.Touch then
-                -- Сбрасываем флаги для свайпа
-                isDragging = false
-                dragStartTime = tick()
-                
                 -- Визуальная обратная связь
                 ToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
             end
         end)
         
-        ToggleBtn.InputChanged:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.Touch then
-                -- Если перемещение было значительным, считаем это свайпом
-                if (input.Position - input.StartPosition).Magnitude > 5 then
-                    isDragging = true
-                end
-            end
-        end)
-        
         ToggleBtn.InputEnded:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.Touch then
-                local clickDuration = tick() - dragStartTime
-                
-                -- Если это был быстрый тап (не долгое удержание) и не свайп
-                if not isDragging and clickDuration < 0.5 then
-                    toggleFunction()
-                end
-                
+                -- Переключаем
+                toggleFunction()
                 -- Возвращаем цвет
                 ToggleBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                isDragging = false
             end
         end)
         
