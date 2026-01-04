@@ -13,8 +13,6 @@ function BdevLib:CreateWindow(options)
     local Dev = Instance.new("Frame")
     local TextLabel = Instance.new("TextLabel")
     local Window = Instance.new("Frame")
-    local UIListLayout = Instance.new("UIListLayout")
-    local UIPadding = Instance.new("UIPadding")
     local IconBtn = Instance.new("ImageButton")
     local UICorner_7 = Instance.new("UICorner")
 
@@ -76,16 +74,6 @@ function BdevLib:CreateWindow(options)
     Window.BorderSizePixel = 0
     Window.Position = UDim2.new(0, 0, 0.15289256, 0)
     Window.Size = UDim2.new(0, 193, 0, 205)
-
-    -- ВАЖНО: UIListLayout для Window
-    UIListLayout.Parent = Window
-    UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    UIListLayout.Padding = UDim.new(0, 8)  -- Твой Padding
-
-    -- ВАЖНО: UIPadding для Window
-    UIPadding.Parent = Window
-    UIPadding.PaddingTop = UDim.new(0, 5)
-    UIPadding.PaddingLeft = UDim.new(0.8, -12)  -- Твой PaddingLeft
 
     -- Новая кнопка-иконка
     IconBtn.Name = "IconBtn"
@@ -185,6 +173,7 @@ function BdevLib:CreateWindow(options)
     -- Функция для создания кнопки
     function window:CreateButton(options)
         local Button = Instance.new("Frame")
+        local UIListLayout_2 = Instance.new("UIListLayout")
         local UIPadding_2 = Instance.new("UIPadding")
         local ClickBtn = Instance.new("TextButton")
         local UICorner_6 = Instance.new("UICorner")
@@ -196,13 +185,16 @@ function BdevLib:CreateWindow(options)
         Button.BackgroundTransparency = 1.000
         Button.BorderColor3 = Color3.fromRGB(0, 0, 0)
         Button.BorderSizePixel = 0
-        Button.Size = UDim2.new(1, 0, 0, 27)  -- Ширина 100% от Window
+        Button.Position = UDim2.new(0.00420162221, 0, 0.222046345, 0)
+        Button.Size = UDim2.new(0, 192, 0, 27)
 
-        -- Убрал UIListLayout_2, он не нужен внутри Button
-        -- UIListLayout уже есть в Window
+        -- UIListLayout внутри Button
+        UIListLayout_2.Parent = Button
+        UIListLayout_2.SortOrder = Enum.SortOrder.LayoutOrder
+        UIListLayout_2.Padding = UDim.new(0, 8)
 
         UIPadding_2.Parent = Button
-        UIPadding_2.PaddingLeft = UDim.new(0.8, -12)  -- Твой PaddingLeft
+        UIPadding_2.PaddingLeft = UDim.new(0.800000012, -12)
 
         ClickBtn.Name = "ClickBtn"
         ClickBtn.Parent = Button
@@ -242,12 +234,15 @@ function BdevLib:CreateWindow(options)
                 options.Callback()
             end
         end)
+        
+        return Button
     end
 
     -- Функция для создания переключателя
     function window:CreateToggle(options)
         local Tbutton = Instance.new("Frame")
-        local UIPadding_3 = Instance.new("UIPadding")
+        local UIListLayout = Instance.new("UIListLayout")
+        local UIPadding = Instance.new("UIPadding")
         local ToggleBtn = Instance.new("TextButton")
         local UICorner_3 = Instance.new("UICorner")
         local Background = Instance.new("Frame")
@@ -264,13 +259,16 @@ function BdevLib:CreateWindow(options)
         Tbutton.BackgroundTransparency = 1.000
         Tbutton.BorderColor3 = Color3.fromRGB(0, 0, 0)
         Tbutton.BorderSizePixel = 0
-        Tbutton.Size = UDim2.new(1, 0, 0, 17)  -- Ширина 100% от Window
+        Tbutton.Position = UDim2.new(0, 0, 0.0648648888, 0)
+        Tbutton.Size = UDim2.new(0, 192, 0, 17)
 
-        -- Убрал UIListLayout_3, он не нужен внутри Tbutton
-        -- UIListLayout уже есть в Window
+        -- UIListLayout внутри Tbutton
+        UIListLayout.Parent = Tbutton
+        UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        UIListLayout.Padding = UDim.new(0, 8)
 
-        UIPadding_3.Parent = Tbutton
-        UIPadding_3.PaddingLeft = UDim.new(0.8, -12)  -- Твой PaddingLeft
+        UIPadding.Parent = Tbutton
+        UIPadding.PaddingLeft = UDim.new(0.800000012, -12)
 
         ToggleBtn.Name = "ToggleBtn"
         ToggleBtn.Parent = Tbutton
@@ -347,6 +345,8 @@ function BdevLib:CreateWindow(options)
             toggled = not toggled
             updateToggle()
         end)
+        
+        return Tbutton
     end
 
     return window
