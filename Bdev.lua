@@ -417,33 +417,57 @@ function BdevLib:CreateWindow(options)
         local touchStarted = false
         local touchStartPos = nil
 
-        -- ПРОСТОЙ ОБРАБОТЧИК КЛИКА - только это
+        -- Функция для обработки клика/тапа
+        local function handleToggleInput(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or
+               input.UserInputType == Enum.UserInputType.Touch then
+               
+                if isMobile and input.UserInputType == Enum.UserInputType.Touch then
+                    -- Для мобильных: проверяем свайп
+                    if touchStartPos then
+                        local distance = (input.Position - touchStartPos).Magnitude
+                        if distance < 10 then
+                            toggleFunction()
+                        end
+                    else
+                        toggleFunction()
+                    end
+                    touchStarted = false
+                    touchStartPos = nil
+                else
+                    -- Для ПК: просто переключаем
+                    toggleFunction()
+                end
+            end
+        end
+
+        -- Основной обработчик для ToggleBtn
         ToggleBtn.MouseButton1Click:Connect(toggleFunction)
-        
-        -- Для мобильных: отслеживаем начало и конец касания
+        ToggleBtn.InputEnded:Connect(handleToggleInput)
         ToggleBtn.InputBegan:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.Touch then
                 touchStarted = true
                 touchStartPos = input.Position
             end
         end)
-        
-        ToggleBtn.InputEnded:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.Touch and touchStarted then
-                -- Проверяем, было ли движение (свайп)
-                if touchStartPos then
-                    local distance = (input.Position - touchStartPos).Magnitude
-                    -- Если расстояние больше 10 пикселей, считаем это свайпом
-                    if distance < 10 then
-                        -- Это тап, переключаем
-                        toggleFunction()
-                    end
-                else
-                    -- Безопасный переключатель на случай если позиция не сохранена
-                    toggleFunction()
-                end
-                touchStarted = false
-                touchStartPos = nil
+
+        -- Обработчик для Background
+        Background.MouseButton1Click:Connect(toggleFunction)
+        Background.InputEnded:Connect(handleToggleInput)
+        Background.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.Touch then
+                touchStarted = true
+                touchStartPos = input.Position
+            end
+        end)
+
+        -- Обработчик для Circle
+        Circle.MouseButton1Click:Connect(toggleFunction)
+        Circle.InputEnded:Connect(handleToggleInput)
+        Circle.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.Touch then
+                touchStarted = true
+                touchStartPos = input.Position
             end
         end)
         
