@@ -93,6 +93,89 @@ function BdevLib:CreateWindow(options)
     UICorner_7.CornerRadius = UDim.new(1.5, 0)
     UICorner_7.Parent = IconBtn
 
+    -- Флаги для отслеживания перетаскивания
+    local draggingMain = false
+    local dragStartMain
+    local startPosMain
+    
+    local draggingIcon = false
+    local dragStartIcon
+    local startPosIcon
+
+    -- Функция для перетаскивания главного окна
+    local function updateMain(input)
+        local delta = input.Position - dragStartMain
+        Main.Position = UDim2.new(
+            startPosMain.X.Scale, 
+            startPosMain.X.Offset + delta.X,
+            startPosMain.Y.Scale, 
+            startPosMain.Y.Offset + delta.Y
+        )
+    end
+    
+    -- Начинаем перетаскивание главного окна
+    TopBar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or 
+           input.UserInputType == Enum.UserInputType.Touch then
+            draggingMain = true
+            dragStartMain = input.Position
+            startPosMain = Main.Position
+        end
+    end)
+    
+    -- Обрабатываем перетаскивание главного окна
+    UserInputService.InputChanged:Connect(function(input)
+        if draggingMain and (input.UserInputType == Enum.UserInputType.MouseMovement or
+           input.UserInputType == Enum.UserInputType.Touch) then
+            updateMain(input)
+        end
+    end)
+    
+    -- Завершаем перетаскивание главного окна
+    TopBar.InputEnded:Connect(function(input)
+        if draggingMain and (input.UserInputType == Enum.UserInputType.MouseButton1 or 
+           input.UserInputType == Enum.UserInputType.Touch) then
+            draggingMain = false
+        end
+    end)
+    
+    -- Функция для перетаскивания иконки
+    local function updateIcon(input)
+        local delta = input.Position - dragStartIcon
+        IconBtn.Position = UDim2.new(
+            startPosIcon.X.Scale,
+            startPosIcon.X.Offset + delta.X,
+            startPosIcon.Y.Scale,
+            startPosIcon.Y.Offset + delta.Y
+        )
+    end
+    
+    -- Начинаем перетаскивание иконки
+    IconBtn.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or 
+           input.UserInputType == Enum.UserInputType.Touch then
+            draggingIcon = true
+            dragStartIcon = input.Position
+            startPosIcon = IconBtn.Position
+        end
+    end)
+    
+    -- Обрабатываем перетаскивание иконки
+    UserInputService.InputChanged:Connect(function(input)
+        if draggingIcon and (input.UserInputType == Enum.UserInputType.MouseMovement or
+           input.UserInputType == Enum.UserInputType.Touch) then
+            updateIcon(input)
+        end
+    end)
+    
+    -- Завершаем перетаскивание иконки
+    IconBtn.InputEnded:Connect(function(input)
+        if draggingIcon and (input.UserInputType == Enum.UserInputType.MouseButton1 or 
+           input.UserInputType == Enum.UserInputType.Touch) then
+            draggingIcon = false
+        end
+    end)
+
     -- Функционал открытия/закрытия меню
     local isOpen = false
     
@@ -102,9 +185,30 @@ function BdevLib:CreateWindow(options)
         Main.Visible = isOpen
     end
     
-    -- Обработчик клика для иконки (только клик!)
-    IconBtn.MouseButton1Click:Connect(toggleMenu)
-    IconBtn.TouchTap:Connect(toggleMenu)
+    -- Открытие/закрытие меню по клику на иконку
+    local function handleIconClick()
+        if not draggingIcon then
+            toggleMenu()
+        end
+    end
+    
+    -- Для ПК
+    IconBtn.MouseButton1Click:Connect(handleIconClick)
+    
+    -- Для мобильных устройств
+    local iconClicked = false
+    IconBtn.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch then
+            iconClicked = true
+        end
+    end)
+    
+    IconBtn.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch and iconClicked then
+            handleIconClick()
+            iconClicked = false
+        end
+    end)
 
     -- Счетчик для Y-позиции (будем увеличивать при создании новых элементов)
     local currentYOffset = 8
@@ -174,9 +278,28 @@ function BdevLib:CreateWindow(options)
             end
         end
         
-        -- Для ПК и мобильных: простой клик/тап
+        -- Для ПК: MouseButton1Click
         ClickBtn.MouseButton1Click:Connect(handleButtonClick)
-        ClickBtn.TouchTap:Connect(handleButtonClick)
+        
+        -- Для мобильных: простой тап
+        local buttonClicked = false
+        ClickBtn.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.Touch then
+                buttonClicked = true
+                -- Визуальная обратная связь
+                ClickBtn.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+            end
+        end)
+        
+        ClickBtn.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.Touch and buttonClicked then
+                -- Вызываем callback
+                handleButtonClick()
+                -- Возвращаем цвет
+                ClickBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                buttonClicked = false
+            end
+        end)
         
         -- Увеличиваем Y-позицию для следующего элемента
         currentYOffset = currentYOffset + 35
@@ -315,9 +438,28 @@ function BdevLib:CreateWindow(options)
             updateToggle()
         end
 
-        -- ТОЛЬКО ПРОСТОЙ КЛИК!
+        -- ПРОСТОЙ ОБРАБОТЧИК КЛИКА - без всяких проверок времени
         ToggleBtn.MouseButton1Click:Connect(toggleFunction)
-        ToggleBtn.TouchTap:Connect(toggleFunction)
+        
+        -- Для мобильных: также простой тап без проверок
+        local toggleClicked = false
+        ToggleBtn.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.Touch then
+                toggleClicked = true
+                -- Визуальная обратная связь
+                ToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+            end
+        end)
+        
+        ToggleBtn.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.Touch and toggleClicked then
+                -- Переключаем
+                toggleFunction()
+                -- Возвращаем цвет
+                ToggleBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                toggleClicked = false
+            end
+        end)
         
         -- Увеличиваем Y-позицию для следующего элемента
         currentYOffset = currentYOffset + 25
