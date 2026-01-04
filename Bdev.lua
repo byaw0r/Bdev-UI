@@ -271,10 +271,12 @@ function BdevLib:CreateWindow(options)
             end
         end
         
-        -- Для ПК: MouseButton1Click
+        -- ОЧЕНЬ ВАЖНО: Разные обработчики для ПК и мобильных
+        
+        -- Для ПК: MouseButton1Click (самый надежный способ)
         ClickBtn.MouseButton1Click:Connect(handleButtonClick)
         
-        -- Для мобильных: простой тап
+        -- Для мобильных: простой тап без сложных проверок
         ClickBtn.InputBegan:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.Touch then
                 -- Визуальная обратная связь
@@ -428,10 +430,12 @@ function BdevLib:CreateWindow(options)
             updateToggle()
         end
 
-        -- ПРОСТОЙ ОБРАБОТЧИК КЛИКА - только это
+        -- ОЧЕНЬ ВАЖНО: Разные обработчики для ПК и мобильных
+        
+        -- Для ПК: MouseButton1Click (самый надежный способ)
         ToggleBtn.MouseButton1Click:Connect(toggleFunction)
         
-        -- Для мобильных: также простой тап
+        -- Для мобильных: простой тап без сложных проверок
         ToggleBtn.InputBegan:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.Touch then
                 -- Визуальная обратная связь
