@@ -22,6 +22,7 @@ function BdevLib:CreateWindow(options)
     BdevUI.Name = "Bdev UI"
     BdevUI.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
     BdevUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    BdevUI.ResetOnSpawn = false
 
     Main.Name = "Main"
     Main.Parent = BdevUI
@@ -66,7 +67,6 @@ function BdevLib:CreateWindow(options)
     TextLabel.TextSize = 30
     TextLabel.TextWrapped = true
     TextLabel.TextXAlignment = Enum.TextXAlignment.Left
-    TextLabel.FontFace = Font.new("rbxasset://fonts/families/Fondamento.json", Enum.FontWeight.Bold)
 
     Window.Name = "Window"
     Window.Parent = Main
@@ -107,7 +107,7 @@ function BdevLib:CreateWindow(options)
     local UserInputService = game:GetService("UserInputService")
     local isMobile = UserInputService.TouchEnabled
 
-    -- ОБНОВЛЕННЫЙ Функционал перетаскивания для главного окна (поддержка сенсора)
+    -- Функционал перетаскивания для главного окна
     local draggingMain = false
     local dragInputMain
     local dragStartMain
@@ -131,27 +131,29 @@ function BdevLib:CreateWindow(options)
             dragStartMain = input.Position
             startPosMain = Main.Position
             
-            input.Changed:Connect(function()
+            local connection
+            connection = input.Changed:Connect(function()
                 if input.UserInputState == Enum.UserInputState.End then
                     draggingMain = false
+                    connection:Disconnect()
                 end
             end)
         end
     end
     
-    -- Универсальная функция для отслеживания ввода (работает на ПК и телефоне)
+    -- Универсальная функция для отслеживания ввода
     local function handleDragInput(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement or
-           input.UserInputType == Enum.UserInputType.Touch then
+        if draggingMain and (input.UserInputType == Enum.UserInputType.MouseMovement or
+           input.UserInputType == Enum.UserInputType.Touch) then
             dragInputMain = input
         end
     end
     
-    -- Подключаем обработчики для обоих типов ввода
+    -- Подключаем обработчики
     TopBar.InputBegan:Connect(beginDrag)
     TopBar.InputChanged:Connect(handleDragInput)
     
-    -- ОБНОВЛЕННЫЙ Функционал перетаскивания для кнопки-иконки (поддержка сенсора)
+    -- Функционал перетаскивания для кнопки-иконки
     local draggingIcon = false
     local dragInputIcon
     local dragStartIcon
@@ -175,9 +177,11 @@ function BdevLib:CreateWindow(options)
             dragStartIcon = input.Position
             startPosIcon = IconBtn.Position
             
-            input.Changed:Connect(function()
+            local connection
+            connection = input.Changed:Connect(function()
                 if input.UserInputState == Enum.UserInputState.End then
                     draggingIcon = false
+                    connection:Disconnect()
                 end
             end)
         end
@@ -185,8 +189,8 @@ function BdevLib:CreateWindow(options)
     
     -- Универсальная функция для отслеживания ввода иконки
     local function handleIconDragInput(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement or
-           input.UserInputType == Enum.UserInputType.Touch then
+        if draggingIcon and (input.UserInputType == Enum.UserInputType.MouseMovement or
+           input.UserInputType == Enum.UserInputType.Touch) then
             dragInputIcon = input
         end
     end
@@ -195,40 +199,51 @@ function BdevLib:CreateWindow(options)
     IconBtn.InputBegan:Connect(beginIconDrag)
     IconBtn.InputChanged:Connect(handleIconDragInput)
     
-    -- ОБНОВЛЕННЫЙ Обработчик перемещения для обоих окон
+    -- Обработчик перемещения для обоих окон
     UserInputService.InputChanged:Connect(function(input)
         -- Перемещение главного окна
-        if input == dragInputMain and draggingMain then
+        if draggingMain and (input.UserInputType == Enum.UserInputType.MouseMovement or
+           input.UserInputType == Enum.UserInputType.Touch) then
             updateMain(input)
         end
         
         -- Перемещение иконки
-        if input == dragInputIcon and draggingIcon then
+        if draggingIcon and (input.UserInputType == Enum.UserInputType.MouseMovement or
+           input.UserInputType == Enum.UserInputType.Touch) then
             updateIcon(input)
         end
     end)
 
-    -- Функционал открытия/закрытия (работает на ПК и телефоне)
+    -- Функционал открытия/закрытия
     local isOpen = false
     
     -- Универсальная функция клика для иконки
-    local function handleIconClick()
-        isOpen = not isOpen
-        Main.Visible = isOpen
+    local function handleIconClick(input)
+        if input and (input.UserInputType == Enum.UserInputType.MouseButton1 or 
+           input.UserInputType == Enum.UserInputType.Touch) then
+            isOpen = not isOpen
+            Main.Visible = isOpen
+        end
     end
     
     -- Подключаем клик для мыши
-    IconBtn.MouseButton1Click:Connect(handleIconClick)
+    IconBtn.MouseButton1Click:Connect(function()
+        isOpen = not isOpen
+        Main.Visible = isOpen
+    end)
     
-    -- Подключаем тап для сенсора
-    if isMobile then
-        IconBtn.TouchTap:Connect(handleIconClick)
-    end
+    -- Для сенсора используем InputBegan с проверкой
+    IconBtn.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch then
+            isOpen = not isOpen
+            Main.Visible = isOpen
+        end
+    end)
 
-    -- Счетчик для Y-позиции (будем увеличивать при создании новых элементов)
-    local currentYOffset = 8
+    -- Убираем фиксированные позиции и используем только LayoutOrder
+    -- currentYOffset больше не нужен
 
-    -- ОБНОВЛЕННАЯ Функция для создания кнопки (поддержка сенсора)
+    -- Функция для создания кнопки
     function window:CreateButton(options)
         local Button = Instance.new("Frame")
         local UIListLayout_2 = Instance.new("UIListLayout")
@@ -243,10 +258,10 @@ function BdevLib:CreateWindow(options)
         Button.BackgroundTransparency = 1.000
         Button.BorderColor3 = Color3.fromRGB(0, 0, 0)
         Button.BorderSizePixel = 0
-        Button.Position = UDim2.new(0.00420162221, 0, 0, currentYOffset)
-        Button.Size = UDim2.new(0, 192, 0, 27)
+        Button.Size = UDim2.new(1, -16, 0, 27)
+        Button.LayoutOrder = #Window:GetChildren() -- Автоматический порядок
 
-        -- UIListLayout внутри Button (из твоего кода)
+        -- UIListLayout внутри Button
         UIListLayout_2.Parent = Button
         UIListLayout_2.SortOrder = Enum.SortOrder.LayoutOrder
         UIListLayout_2.Padding = UDim.new(0, 8)
@@ -259,18 +274,17 @@ function BdevLib:CreateWindow(options)
         ClickBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
         ClickBtn.BorderColor3 = Color3.fromRGB(0, 0, 0)
         ClickBtn.BorderSizePixel = 0
-        ClickBtn.Position = UDim2.new(-6.0550758e-07, 0, 0, 0)
         ClickBtn.Size = UDim2.new(0, 38, 0, 22)
         ClickBtn.Font = Enum.Font.SourceSans
         ClickBtn.Text = ""
         ClickBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
         ClickBtn.TextSize = 14.000
-        ClickBtn.AutoButtonColor = false -- Отключаем автоматическое изменение цвета
+        ClickBtn.AutoButtonColor = false
 
         UICorner_6.CornerRadius = UDim.new(1, 0)
         UICorner_6.Parent = ClickBtn
 
-        -- Текст кнопки с точными позициями из твоего кода
+        -- Текст кнопки
         FunText.Name = "FunText"
         FunText.Parent = ClickBtn
         FunText.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -285,9 +299,8 @@ function BdevLib:CreateWindow(options)
         FunText.TextScaled = true
         FunText.TextSize = 16
         FunText.TextWrapped = true
-        FunText.FontFace = Font.new("rbxasset://fonts/families/Jura.json", Enum.FontWeight.Bold)
 
-        -- ОБНОВЛЕННЫЙ Callback с поддержкой сенсора
+        -- Callback с поддержкой сенсора
         local function handleButtonClick()
             if options.Callback then
                 options.Callback()
@@ -297,38 +310,29 @@ function BdevLib:CreateWindow(options)
         -- Подключаем клик для мыши
         ClickBtn.MouseButton1Click:Connect(handleButtonClick)
         
-        -- Подключаем тап для сенсора
-        if isMobile then
-            -- Для сенсорных устройств добавляем визуальную обратную связь
-            local function handleTouch(input)
-                if input.UserInputType == Enum.UserInputType.Touch then
-                    handleButtonClick()
-                end
+        -- Подключаем тап для сенсора через InputBegan
+        ClickBtn.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.Touch then
+                handleButtonClick()
+                
+                -- Визуальная обратная связь
+                local originalColor = ClickBtn.BackgroundColor3
+                ClickBtn.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+                
+                local connection
+                connection = input.Changed:Connect(function()
+                    if input.UserInputState == Enum.UserInputState.End then
+                        ClickBtn.BackgroundColor3 = originalColor
+                        connection:Disconnect()
+                    end
+                end)
             end
-            
-            ClickBtn.TouchTap:Connect(handleButtonClick)
-            
-            -- Добавляем анимацию нажатия для сенсора
-            ClickBtn.InputBegan:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.Touch then
-                    ClickBtn.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
-                end
-            end)
-            
-            ClickBtn.InputEnded:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.Touch then
-                    ClickBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                end
-            end)
-        end
-        
-        -- Увеличиваем Y-позицию для следующего элемента
-        currentYOffset = currentYOffset + 35
+        end)
         
         return Button
     end
 
-    -- ОБНОВЛЕННАЯ Функция для создания переключателя (поддержка сенсора)
+    -- Функция для создания переключателя
     function window:CreateToggle(options)
         local Tbutton = Instance.new("Frame")
         local UIListLayout = Instance.new("UIListLayout")
@@ -349,10 +353,10 @@ function BdevLib:CreateWindow(options)
         Tbutton.BackgroundTransparency = 1.000
         Tbutton.BorderColor3 = Color3.fromRGB(0, 0, 0)
         Tbutton.BorderSizePixel = 0
-        Tbutton.Position = UDim2.new(0, 0, 0, currentYOffset)
-        Tbutton.Size = UDim2.new(0, 192, 0, 17)
+        Tbutton.Size = UDim2.new(1, -16, 0, 17)
+        Tbutton.LayoutOrder = #Window:GetChildren() -- Автоматический порядок
 
-        -- UIListLayout внутри Tbutton (из твоего кода)
+        -- UIListLayout внутри Tbutton
         UIListLayout.Parent = Tbutton
         UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
         UIListLayout.Padding = UDim.new(0, 8)
@@ -371,7 +375,7 @@ function BdevLib:CreateWindow(options)
         ToggleBtn.Text = ""
         ToggleBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
         ToggleBtn.TextSize = 14.000
-        ToggleBtn.AutoButtonColor = false -- Отключаем автоматическое изменение цвета
+        ToggleBtn.AutoButtonColor = false
 
         UICorner_3.CornerRadius = UDim.new(1, 2)
         UICorner_3.Parent = ToggleBtn
@@ -400,7 +404,7 @@ function BdevLib:CreateWindow(options)
         UICorner_5.CornerRadius = UDim.new(1, 2)
         UICorner_5.Parent = Circle
 
-        -- Текст переключателя с точными позициями из твоего кода
+        -- Текст переключателя
         NameFunction.Name = "NameFunction"
         NameFunction.Parent = ToggleBtn
         NameFunction.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -415,7 +419,6 @@ function BdevLib:CreateWindow(options)
         NameFunction.TextScaled = true
         NameFunction.TextSize = 16
         NameFunction.TextWrapped = true
-        NameFunction.FontFace = Font.new("rbxasset://fonts/families/Jura.json", Enum.FontWeight.Bold)
 
         -- Функция переключения
         local function updateToggle()
@@ -432,35 +435,31 @@ function BdevLib:CreateWindow(options)
             end
         end
 
-        -- ОБНОВЛЕННЫЙ Обработчик клика для мыши
+        -- Обработчик клика для мыши
         ToggleBtn.MouseButton1Click:Connect(function()
             toggled = not toggled
             updateToggle()
         end)
         
-        -- ОБНОВЛЕННЫЙ Обработчик для сенсора
-        if isMobile then
-            ToggleBtn.TouchTap:Connect(function()
+        -- Обработчик для сенсора через InputBegan
+        ToggleBtn.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.Touch then
                 toggled = not toggled
                 updateToggle()
-            end)
-            
-            -- Добавляем анимацию нажатия для сенсора
-            ToggleBtn.InputBegan:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.Touch then
-                    ToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
-                end
-            end)
-            
-            ToggleBtn.InputEnded:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.Touch then
-                    ToggleBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                end
-            end)
-        end
-        
-        -- Увеличиваем Y-позицию для следующего элемента
-        currentYOffset = currentYOffset + 25
+                
+                -- Визуальная обратная связь
+                local originalColor = ToggleBtn.BackgroundColor3
+                ToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+                
+                local connection
+                connection = input.Changed:Connect(function()
+                    if input.UserInputState == Enum.UserInputState.End then
+                        ToggleBtn.BackgroundColor3 = originalColor
+                        connection:Disconnect()
+                    end
+                end)
+            end
+        end)
         
         return Tbutton
     end
