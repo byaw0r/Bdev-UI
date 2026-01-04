@@ -8,7 +8,6 @@ function BdevLib:CreateWindow(options)
     local UserInputService = game:GetService("UserInputService")
     local TweenService = game:GetService("TweenService")
     local RunService = game:GetService("RunService")
-    local isMobile = UserInputService.TouchEnabled
     local Players = game:GetService("Players")
     local player = Players.LocalPlayer
     
@@ -187,13 +186,31 @@ function BdevLib:CreateWindow(options)
         Main.Visible = isOpen
     end
     
-    -- Обработчик клика для иконки
-    IconBtn.MouseButton1Click:Connect(toggleMenu)
-    
-    -- Для сенсора: простое нажатие-отпускание
-    IconBtn.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.Touch and not draggingIcon then
-            toggleMenu()
+    -- Универсальный обработчик клика для иконки (работает и на ПК, и на мобильных)
+    IconBtn.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or 
+           input.UserInputType == Enum.UserInputType.Touch then
+            -- Не начинаем перетаскивание сразу, ждем немного
+            local startTime = tick()
+            local startPos = input.Position
+            
+            -- Обработчик конца ввода
+            local connection
+            connection = input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    connection:Disconnect()
+                    
+                    -- Проверяем, было ли это короткое нажатие (не перетаскивание)
+                    local endTime = tick()
+                    local endPos = input.Position
+                    local distance = (endPos - startPos).Magnitude
+                    
+                    if (endTime - startTime < 0.3) and (distance < 5) then
+                        -- Это был клик/тап, а не перетаскивание
+                        toggleMenu()
+                    end
+                end
+            end)
         end
     end)
 
@@ -237,7 +254,7 @@ function BdevLib:CreateWindow(options)
         ClickBtn.Text = ""
         ClickBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
         ClickBtn.TextSize = 14.000
-        ClickBtn.AutoButtonColor = true  -- ВКЛЮЧАЕМ стандартное поведение кнопки!
+        ClickBtn.AutoButtonColor = true
 
         UICorner_6.CornerRadius = UDim.new(1, 0)
         UICorner_6.Parent = ClickBtn
@@ -265,14 +282,24 @@ function BdevLib:CreateWindow(options)
             end
         end
         
-        -- Для ПК: MouseButton1Click
-        ClickBtn.MouseButton1Click:Connect(handleButtonClick)
-        
-        -- Для мобильных: простой тап
-        ClickBtn.InputEnded:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.Touch then
-                -- Вызываем callback
-                handleButtonClick()
+        -- Универсальный обработчик клика (работает и на ПК, и на мобильных)
+        ClickBtn.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or 
+               input.UserInputType == Enum.UserInputType.Touch then
+                -- Визуальная обратная связь
+                ClickBtn.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+                
+                -- Обработчик конца ввода
+                local connection
+                connection = input.Changed:Connect(function()
+                    if input.UserInputState == Enum.UserInputState.End then
+                        connection:Disconnect()
+                        
+                        -- Возвращаем цвет и вызываем callback
+                        ClickBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                        handleButtonClick()
+                    end
+                end)
             end
         end)
         
@@ -328,7 +355,7 @@ function BdevLib:CreateWindow(options)
         ToggleBtn.Text = ""
         ToggleBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
         ToggleBtn.TextSize = 14.000
-        ToggleBtn.AutoButtonColor = true  -- ВКЛЮЧАЕМ стандартное поведение!
+        ToggleBtn.AutoButtonColor = true
 
         UICorner_3.CornerRadius = UDim.new(1, 2)
         UICorner_3.Parent = ToggleBtn
@@ -413,61 +440,24 @@ function BdevLib:CreateWindow(options)
             updateToggle()
         end
 
-        -- Переменные для отслеживания тапа/свайпа
-        local touchStarted = false
-        local touchStartPos = nil
-
-        -- Функция для обработки клика/тапа
-        local function handleToggleInput(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or
+        -- Универсальный обработчик клика (работает и на ПК, и на мобильных)
+        ToggleBtn.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or 
                input.UserInputType == Enum.UserInputType.Touch then
-               
-                if isMobile and input.UserInputType == Enum.UserInputType.Touch then
-                    -- Для мобильных: проверяем свайп
-                    if touchStartPos then
-                        local distance = (input.Position - touchStartPos).Magnitude
-                        if distance < 10 then
-                            toggleFunction()
-                        end
-                    else
+                -- Визуальная обратная связь
+                ToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+                
+                -- Обработчик конца ввода
+                local connection
+                connection = input.Changed:Connect(function()
+                    if input.UserInputState == Enum.UserInputState.End then
+                        connection:Disconnect()
+                        
+                        -- Возвращаем цвет и переключаем
+                        ToggleBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
                         toggleFunction()
                     end
-                    touchStarted = false
-                    touchStartPos = nil
-                else
-                    -- Для ПК: просто переключаем
-                    toggleFunction()
-                end
-            end
-        end
-
-        -- Основной обработчик для ToggleBtn
-        ToggleBtn.MouseButton1Click:Connect(toggleFunction)
-        ToggleBtn.InputEnded:Connect(handleToggleInput)
-        ToggleBtn.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.Touch then
-                touchStarted = true
-                touchStartPos = input.Position
-            end
-        end)
-
-        -- Обработчик для Background
-        Background.MouseButton1Click:Connect(toggleFunction)
-        Background.InputEnded:Connect(handleToggleInput)
-        Background.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.Touch then
-                touchStarted = true
-                touchStartPos = input.Position
-            end
-        end)
-
-        -- Обработчик для Circle
-        Circle.MouseButton1Click:Connect(toggleFunction)
-        Circle.InputEnded:Connect(handleToggleInput)
-        Circle.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.Touch then
-                touchStarted = true
-                touchStartPos = input.Position
+                end)
             end
         end)
         
