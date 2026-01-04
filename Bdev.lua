@@ -413,14 +413,37 @@ function BdevLib:CreateWindow(options)
             updateToggle()
         end
 
+        -- Переменные для отслеживания тапа/свайпа
+        local touchStarted = false
+        local touchStartPos = nil
+
         -- ПРОСТОЙ ОБРАБОТЧИК КЛИКА - только это
         ToggleBtn.MouseButton1Click:Connect(toggleFunction)
         
-        -- Для мобильных: также простой тап
-        ToggleBtn.InputEnded:Connect(function(input)
+        -- Для мобильных: отслеживаем начало и конец касания
+        ToggleBtn.InputBegan:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.Touch then
-                -- Переключаем
-                toggleFunction()
+                touchStarted = true
+                touchStartPos = input.Position
+            end
+        end)
+        
+        ToggleBtn.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.Touch and touchStarted then
+                -- Проверяем, было ли движение (свайп)
+                if touchStartPos then
+                    local distance = (input.Position - touchStartPos).Magnitude
+                    -- Если расстояние больше 10 пикселей, считаем это свайпом
+                    if distance < 10 then
+                        -- Это тап, переключаем
+                        toggleFunction()
+                    end
+                else
+                    -- Безопасный переключатель на случай если позиция не сохранена
+                    toggleFunction()
+                end
+                touchStarted = false
+                touchStartPos = nil
             end
         end)
         
