@@ -7,6 +7,8 @@ function BdevLib:CreateWindow(options)
     -- Получаем сервисы
     local UserInputService = game:GetService("UserInputService")
     local TweenService = game:GetService("TweenService")
+    local RunService = game:GetService("RunService")
+    local isMobile = UserInputService.TouchEnabled
     local Players = game:GetService("Players")
     local player = Players.LocalPlayer
     
@@ -22,7 +24,7 @@ function BdevLib:CreateWindow(options)
     local IconBtn = Instance.new("ImageButton")
     local UICorner_7 = Instance.new("UICorner")
 
-    -- Настройка свойств
+    -- Настройка свойств из твоего кода
     BdevUI.Name = "Bdev UI"
     BdevUI.Parent = player:WaitForChild("PlayerGui")
     BdevUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
@@ -101,7 +103,6 @@ function BdevLib:CreateWindow(options)
     local draggingIcon = false
     local dragStartIcon
     local startPosIcon
-    local iconWasClicked = false
 
     -- Функция для перетаскивания главного окна
     local function updateMain(input)
@@ -158,7 +159,6 @@ function BdevLib:CreateWindow(options)
             draggingIcon = true
             dragStartIcon = input.Position
             startPosIcon = IconBtn.Position
-            iconWasClicked = true
         end
     end)
     
@@ -167,8 +167,6 @@ function BdevLib:CreateWindow(options)
         if draggingIcon and (input.UserInputType == Enum.UserInputType.MouseMovement or
            input.UserInputType == Enum.UserInputType.Touch) then
             updateIcon(input)
-            -- Если началось перетаскивание, то это не клик
-            iconWasClicked = false
         end
     end)
     
@@ -177,23 +175,33 @@ function BdevLib:CreateWindow(options)
         if draggingIcon and (input.UserInputType == Enum.UserInputType.MouseButton1 or 
            input.UserInputType == Enum.UserInputType.Touch) then
             draggingIcon = false
-            
-            -- Если это был клик (не перетаскивание), открываем/закрываем меню
-            if iconWasClicked then
-                toggleMenu()
-            end
-            iconWasClicked = false
         end
     end)
 
-    -- ✅ ИСПРАВЛЕНО: предварительное объявление функции
+    -- Функционал открытия/закрытия меню
     local isOpen = false
-    local toggleMenu
-
-    toggleMenu = function()
+    
+    -- Функция для открытия/закрытия меню
+    local function toggleMenu()
         isOpen = not isOpen
         Main.Visible = isOpen
     end
+    
+    -- Обработчик клика для иконки
+    IconBtn.MouseButton1Click:Connect(toggleMenu)
+    
+    -- Для сенсора: простое нажатие-отпускание
+    IconBtn.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch then
+            -- Начинаем отслеживать
+        end
+    end)
+    
+    IconBtn.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch and not draggingIcon then
+            toggleMenu()
+        end
+    end)
 
     -- Счетчик для Y-позиции (будем увеличивать при создании новых элементов)
     local currentYOffset = 8
@@ -235,12 +243,12 @@ function BdevLib:CreateWindow(options)
         ClickBtn.Text = ""
         ClickBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
         ClickBtn.TextSize = 14.000
-        ClickBtn.AutoButtonColor = true
+        ClickBtn.AutoButtonColor = true  -- ВКЛЮЧАЕМ стандартное поведение кнопки!
 
         UICorner_6.CornerRadius = UDim.new(1, 0)
         UICorner_6.Parent = ClickBtn
 
-        -- Текст кнопки
+        -- Текст кнопки с точными позициями из твоего кода
         FunText.Name = "FunText"
         FunText.Parent = ClickBtn
         FunText.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -263,19 +271,22 @@ function BdevLib:CreateWindow(options)
             end
         end
         
-        -- Для ПК
+        -- Для ПК: MouseButton1Click
         ClickBtn.MouseButton1Click:Connect(handleButtonClick)
         
-        -- Для мобильных
+        -- Для мобильных: простой тап
         ClickBtn.InputBegan:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.Touch then
+                -- Визуальная обратная связь
                 ClickBtn.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
             end
         end)
         
         ClickBtn.InputEnded:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.Touch then
+                -- Вызываем callback
                 handleButtonClick()
+                -- Возвращаем цвет
                 ClickBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
             end
         end)
@@ -332,7 +343,7 @@ function BdevLib:CreateWindow(options)
         ToggleBtn.Text = ""
         ToggleBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
         ToggleBtn.TextSize = 14.000
-        ToggleBtn.AutoButtonColor = true
+        ToggleBtn.AutoButtonColor = true  -- ВКЛЮЧАЕМ стандартное поведение!
 
         UICorner_3.CornerRadius = UDim.new(1, 2)
         UICorner_3.Parent = ToggleBtn
@@ -354,12 +365,14 @@ function BdevLib:CreateWindow(options)
         Circle.BorderColor3 = Color3.fromRGB(0, 0, 0)
         Circle.BorderSizePixel = 0
         Circle.Size = UDim2.new(0, 16, 0, 16)
+        
+        -- Позиция круга в зависимости от состояния
         Circle.Position = toggled and UDim2.new(0.59, 0, 0, 0) or UDim2.new(0.025, 0, 0, 0)
 
         UICorner_5.CornerRadius = UDim.new(1, 2)
         UICorner_5.Parent = Circle
 
-        -- Текст переключателя
+        -- Текст переключателя с точными позициями из твоего кода
         NameFunction.Name = "NameFunction"
         NameFunction.Parent = ToggleBtn
         NameFunction.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -375,7 +388,7 @@ function BdevLib:CreateWindow(options)
         NameFunction.TextSize = 16
         NameFunction.TextWrapped = true
 
-        -- Функция переключения с анимацией
+        -- Функция переключения с анимацией круга
         local function updateToggle()
             local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
             
@@ -415,23 +428,27 @@ function BdevLib:CreateWindow(options)
             updateToggle()
         end
 
-        -- Обработчики кликов
+        -- ПРОСТОЙ ОБРАБОТЧИК КЛИКА - только это
         ToggleBtn.MouseButton1Click:Connect(toggleFunction)
         
+        -- Для мобильных: также простой тап
         ToggleBtn.InputBegan:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.Touch then
+                -- Визуальная обратная связь
                 ToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
             end
         end)
         
         ToggleBtn.InputEnded:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.Touch then
+                -- Переключаем
                 toggleFunction()
+                -- Возвращаем цвет
                 ToggleBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
             end
         end)
         
-        -- Увеличиваем Y-позицию
+        -- Увеличиваем Y-позицию для следующего элемента
         currentYOffset = currentYOffset + 25
         
         return {
