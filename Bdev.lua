@@ -4,6 +4,12 @@ local BdevLib = {}
 function BdevLib:CreateWindow(options)
     local window = {}
     
+    -- Получаем сервисы
+    local UserInputService = game:GetService("UserInputService")
+    local isMobile = UserInputService.TouchEnabled
+    local Players = game:GetService("Players")
+    local player = Players.LocalPlayer
+    
     -- Создаем основной GUI
     local BdevUI = Instance.new("ScreenGui")
     local Main = Instance.new("Frame")
@@ -18,17 +24,21 @@ function BdevLib:CreateWindow(options)
 
     -- Настройка свойств из твоего кода
     BdevUI.Name = "Bdev UI"
-    BdevUI.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+    BdevUI.Parent = player:WaitForChild("PlayerGui")
     BdevUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     BdevUI.ResetOnSpawn = false
 
+    -- Получаем размеры экрана
+    local viewportSize = workspace.CurrentCamera.ViewportSize
+    
+    -- Позиционируем Main по центру экрана
     Main.Name = "Main"
     Main.Parent = BdevUI
     Main.BackgroundColor3 = Color3.fromRGB(44, 44, 44)
     Main.BorderColor3 = Color3.fromRGB(0, 0, 0)
     Main.BorderSizePixel = 0
-    Main.Position = UDim2.new(0.373697907, 0, 0.240938172, 0)
     Main.Size = UDim2.new(0, 193, 0, 242)
+    Main.Position = UDim2.new(0.5, -96.5, 0.5, -121) -- Центр экрана
     Main.Visible = false
 
     UICorner.CornerRadius = UDim.new(0, 9)
@@ -75,22 +85,18 @@ function BdevLib:CreateWindow(options)
     Window.Position = UDim2.new(0, 0, 0.15289256, 0)
     Window.Size = UDim2.new(0, 193, 0, 205)
 
-    -- Новая кнопка-иконка
+    -- Кнопка-иконка также по центру экрана
     IconBtn.Name = "IconBtn"
     IconBtn.Parent = BdevUI
     IconBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     IconBtn.BorderColor3 = Color3.fromRGB(0, 0, 0)
     IconBtn.BorderSizePixel = 0
-    IconBtn.Position = UDim2.new(0.21875, 0, 0.272921115, 0)
     IconBtn.Size = UDim2.new(0, 51, 0, 51)
+    IconBtn.Position = UDim2.new(0.5, -25.5, 0.5, -25.5) -- Центр экрана
     IconBtn.Image = "rbxassetid://136075515627576"
 
     UICorner_7.CornerRadius = UDim.new(1.5, 0)
     UICorner_7.Parent = IconBtn
-
-    -- Получаем UserInputService для определения типа устройства
-    local UserInputService = game:GetService("UserInputService")
-    local isMobile = UserInputService.TouchEnabled
 
     -- Функционал перетаскивания для главного окна
     local draggingMain = false
@@ -107,33 +113,33 @@ function BdevLib:CreateWindow(options)
         )
     end
     
-    -- Универсальная функция для начала перетаскивания (работает на ПК и телефоне)
-    local function beginDrag(input)
+    -- Начинаем перетаскивание главного окна
+    local function beginMainDrag(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or 
            input.UserInputType == Enum.UserInputType.Touch then
             draggingMain = true
             dragStartMain = input.Position
             startPosMain = Main.Position
             
-            -- Захватываем курсор/тач
+            -- Захватываем мышь
             if input.UserInputType == Enum.UserInputType.MouseButton1 then
                 UserInputService.MouseBehavior = Enum.MouseBehavior.LockCurrentPosition
             end
         end
     end
     
-    -- Универсальная функция для отслеживания ввода
-    local function handleDragInput(input)
+    -- Обрабатываем перетаскивание главного окна
+    local function handleMainDrag(input)
         if draggingMain and (input.UserInputType == Enum.UserInputType.MouseMovement or
            input.UserInputType == Enum.UserInputType.Touch) then
             updateMain(input)
         end
     end
     
-    -- Универсальная функция для завершения перетаскивания
-    local function endDrag(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or 
-           input.UserInputType == Enum.UserInputType.Touch then
+    -- Завершаем перетаскивание главного окна
+    local function endMainDrag(input)
+        if draggingMain and (input.UserInputType == Enum.UserInputType.MouseButton1 or 
+           input.UserInputType == Enum.UserInputType.Touch) then
             draggingMain = false
             if input.UserInputType == Enum.UserInputType.MouseButton1 then
                 UserInputService.MouseBehavior = Enum.MouseBehavior.Default
@@ -142,9 +148,9 @@ function BdevLib:CreateWindow(options)
     end
     
     -- Подключаем обработчики для главного окна
-    TopBar.InputBegan:Connect(beginDrag)
-    TopBar.InputChanged:Connect(handleDragInput)
-    TopBar.InputEnded:Connect(endDrag)
+    TopBar.InputBegan:Connect(beginMainDrag)
+    TopBar.InputChanged:Connect(handleMainDrag)
+    TopBar.InputEnded:Connect(endMainDrag)
     
     -- Функционал перетаскивания для кнопки-иконки
     local draggingIcon = false
@@ -161,7 +167,7 @@ function BdevLib:CreateWindow(options)
         )
     end
     
-    -- Универсальная функция для начала перетаскивания иконки
+    -- Начинаем перетаскивание иконки
     local function beginIconDrag(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or 
            input.UserInputType == Enum.UserInputType.Touch then
@@ -169,25 +175,25 @@ function BdevLib:CreateWindow(options)
             dragStartIcon = input.Position
             startPosIcon = IconBtn.Position
             
-            -- Захватываем курсор/тач
+            -- Захватываем мышь
             if input.UserInputType == Enum.UserInputType.MouseButton1 then
                 UserInputService.MouseBehavior = Enum.MouseBehavior.LockCurrentPosition
             end
         end
     end
     
-    -- Универсальная функция для отслеживания ввода иконки
-    local function handleIconDragInput(input)
+    -- Обрабатываем перетаскивание иконки
+    local function handleIconDrag(input)
         if draggingIcon and (input.UserInputType == Enum.UserInputType.MouseMovement or
            input.UserInputType == Enum.UserInputType.Touch) then
             updateIcon(input)
         end
     end
     
-    -- Универсальная функция для завершения перетаскивания иконки
+    -- Завершаем перетаскивание иконки
     local function endIconDrag(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or 
-           input.UserInputType == Enum.UserInputType.Touch then
+        if draggingIcon and (input.UserInputType == Enum.UserInputType.MouseButton1 or 
+           input.UserInputType == Enum.UserInputType.Touch) then
             draggingIcon = false
             if input.UserInputType == Enum.UserInputType.MouseButton1 then
                 UserInputService.MouseBehavior = Enum.MouseBehavior.Default
@@ -197,38 +203,30 @@ function BdevLib:CreateWindow(options)
     
     -- Подключаем обработчики для иконки
     IconBtn.InputBegan:Connect(beginIconDrag)
-    IconBtn.InputChanged:Connect(handleIconDragInput)
+    IconBtn.InputChanged:Connect(handleIconDrag)
     IconBtn.InputEnded:Connect(endIconDrag)
 
-    -- Функционал открытия/закрытия
+    -- Функционал открытия/закрытия меню
     local isOpen = false
     
-    -- Обработчик клика для иконки (отдельно от перетаскивания)
-    IconBtn.MouseButton1Click:Connect(function()
+    -- Функция для открытия/закрытия меню
+    local function toggleMenu()
         isOpen = not isOpen
         Main.Visible = isOpen
+    end
+    
+    -- Обработчик клика для мыши (открытие/закрытие меню)
+    IconBtn.MouseButton1Click:Connect(function()
+        toggleMenu()
     end)
     
-    -- Для сенсора используем отдельный таймер для определения тапа
-    local touchStartTime = 0
-    local touchStartPos
-    
+    -- Для сенсора: открываем/закрываем по тапу на иконку
     IconBtn.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.Touch then
-            touchStartTime = tick()
-            touchStartPos = input.Position
-        end
-    end)
-    
-    IconBtn.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.Touch then
-            local touchDuration = tick() - touchStartTime
-            local touchDistance = (input.Position - touchStartPos).magnitude
-            
-            -- Если было короткое нажатие и небольшое перемещение - считаем тапом
-            if touchDuration < 0.3 and touchDistance < 10 then
-                isOpen = not isOpen
-                Main.Visible = isOpen
+        if input.UserInputType == Enum.UserInputType.Touch and not draggingIcon then
+            -- Небольшая задержка для предотвращения конфликта с перетаскиванием
+            task.wait(0.05)
+            if not draggingIcon then
+                toggleMenu()
             end
         end
     end)
@@ -254,7 +252,7 @@ function BdevLib:CreateWindow(options)
         Button.Position = UDim2.new(0.00420162221, 0, 0, currentYOffset)
         Button.Size = UDim2.new(0, 192, 0, 27)
 
-        -- UIListLayout внутри Button (из твоего кода)
+        -- UIListLayout внутри Button
         UIListLayout_2.Parent = Button
         UIListLayout_2.SortOrder = Enum.SortOrder.LayoutOrder
         UIListLayout_2.Padding = UDim.new(0, 8)
@@ -294,17 +292,17 @@ function BdevLib:CreateWindow(options)
         FunText.TextSize = 16
         FunText.TextWrapped = true
 
-        -- Callback с поддержкой сенсора
+        -- Callback функция
         local function handleButtonClick()
             if options.Callback then
                 options.Callback()
             end
         end
         
-        -- Подключаем клик для мыши
+        -- Обработчик клика для мыши
         ClickBtn.MouseButton1Click:Connect(handleButtonClick)
         
-        -- Обработчик для сенсора (с зажимом)
+        -- Обработчик для сенсора (прямой тап)
         local buttonTouchStartTime = 0
         local buttonTouchStartPos
         
@@ -323,8 +321,8 @@ function BdevLib:CreateWindow(options)
                 local touchDuration = tick() - buttonTouchStartTime
                 local touchDistance = (input.Position - buttonTouchStartPos).magnitude
                 
-                -- Если было короткое нажатие и небольшое перемещение - считаем тапом
-                if touchDuration < 0.3 and touchDistance < 10 then
+                -- Если было короткое нажатие (< 0.5 сек) - считаем тапом
+                if touchDuration < 0.5 and touchDistance < 20 then
                     handleButtonClick()
                 end
                 
@@ -363,7 +361,7 @@ function BdevLib:CreateWindow(options)
         Tbutton.Position = UDim2.new(0, 0, 0, currentYOffset)
         Tbutton.Size = UDim2.new(0, 192, 0, 17)
 
-        -- UIListLayout внутри Tbutton (из твоего кода)
+        -- UIListLayout внутри Tbutton
         UIListLayout.Parent = Tbutton
         UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
         UIListLayout.Padding = UDim.new(0, 8)
@@ -448,7 +446,7 @@ function BdevLib:CreateWindow(options)
             updateToggle()
         end)
         
-        -- Обработчик для сенсора (с зажимом)
+        -- Обработчик для сенсора (прямой тап)
         local toggleTouchStartTime = 0
         local toggleTouchStartPos
         
@@ -467,8 +465,8 @@ function BdevLib:CreateWindow(options)
                 local touchDuration = tick() - toggleTouchStartTime
                 local touchDistance = (input.Position - toggleTouchStartPos).magnitude
                 
-                -- Если было короткое нажатие и небольшое перемещение - считаем тапом
-                if touchDuration < 0.3 and touchDistance < 10 then
+                -- Если было короткое нажатие (< 0.5 сек) - считаем тапом
+                if touchDuration < 0.5 and touchDistance < 20 then
                     toggled = not toggled
                     updateToggle()
                 end
