@@ -9,6 +9,9 @@ function BdevLib:CreateWindow(options)
     local Players = game:GetService("Players")
     local player = Players.LocalPlayer
     
+    local Camera = workspace.CurrentCamera
+    local ContextActionService = game:GetService("ContextActionService")
+    
     local BdevUI = Instance.new("ScreenGui")
     local Main = Instance.new("Frame")
     local UICorner = Instance.new("UICorner")
@@ -91,76 +94,162 @@ function BdevLib:CreateWindow(options)
     UICorner_7.Parent = IconBtn
 
     local draggingMain = false
-    local dragStartMain
-    local startPosMain
-    
     local draggingIcon = false
-    local dragStartIcon
-    local startPosIcon
-
-    local function updateMain(input)
-        local delta = input.Position - dragStartMain
-        Main.Position = UDim2.new(
-            startPosMain.X.Scale, 
-            startPosMain.X.Offset + delta.X,
-            startPosMain.Y.Scale, 
-            startPosMain.Y.Offset + delta.Y
-        )
+    
+    local mainDragOffset = Vector2.new(0, 0)
+    local iconDragOffset = Vector2.new(0, 0)
+    
+    local mainRenderConnection
+    local iconRenderConnection
+    
+    local function blockCamera()
+        if UserInputService.TouchEnabled then
+            ContextActionService:BindAction(
+                "BlockCameraWhileDragging",
+                function() return Enum.ContextActionResult.Sink end,
+                false,
+                Enum.UserInputType.Touch
+            )
+            
+            if player.Character and player.Character:FindFirstChild("Humanoid") then
+                player.Character.Humanoid.CameraOffset = Vector3.new(0, 0, 0)
+            end
+        end
+    end
+    
+    local function unblockCamera()
+        if UserInputService.TouchEnabled then
+            ContextActionService:UnbindAction("BlockCameraWhileDragging")
+        end
+    end
+    
+    local function updateMainPosition()
+        if draggingMain then
+            local mousePos = UserInputService:GetMouseLocation()
+            local screenSize = BdevUI.AbsoluteSize
+            
+            local newX = mousePos.X - mainDragOffset.X
+            local newY = mousePos.Y - mainDragOffset.Y
+            
+            newX = math.clamp(newX, 0, screenSize.X - Main.AbsoluteSize.X)
+            newY = math.clamp(newY, 0, screenSize.Y - Main.AbsoluteSize.Y)
+            
+            Main.Position = UDim2.new(0, newX, 0, newY)
+        end
+    end
+    
+    local function updateIconPosition()
+        if draggingIcon then
+            local mousePos = UserInputService:GetMouseLocation()
+            local screenSize = BdevUI.AbsoluteSize
+            
+            local newX = mousePos.X - iconDragOffset.X
+            local newY = mousePos.Y - iconDragOffset.Y
+            
+            newX = math.clamp(newX, 0, screenSize.X - IconBtn.AbsoluteSize.X)
+            newY = math.clamp(newY, 0, screenSize.Y - IconBtn.AbsoluteSize.Y)
+            
+            IconBtn.Position = UDim2.new(0, newX, 0, newY)
+        end
     end
     
     TopBar.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or 
            input.UserInputType == Enum.UserInputType.Touch then
+            if input.UserInputType == Enum.UserInputType.Touch then
+                blockCamera()
+            end
+            
+            local mousePos = UserInputService:GetMouseLocation()
+            local elementPos = Main.AbsolutePosition
+            mainDragOffset = Vector2.new(mousePos.X - elementPos.X, mousePos.Y - elementPos.Y)
+            
             draggingMain = true
-            dragStartMain = input.Position
-            startPosMain = Main.Position
-        end
-    end)
-    
-    UserInputService.InputChanged:Connect(function(input)
-        if draggingMain and (input.UserInputType == Enum.UserInputType.MouseMovement or
-           input.UserInputType == Enum.UserInputType.Touch) then
-            updateMain(input)
+            
+            if not mainRenderConnection then
+                mainRenderConnection = RunService.RenderStepped:Connect(updateMainPosition)
+            end
         end
     end)
     
     TopBar.InputEnded:Connect(function(input)
-        if draggingMain and (input.UserInputType == Enum.UserInputType.MouseButton1 or 
-           input.UserInputType == Enum.UserInputType.Touch) then
+        if (input.UserInputType == Enum.UserInputType.MouseButton1 or 
+            input.UserInputType == Enum.UserInputType.Touch) and draggingMain then
             draggingMain = false
+            
+            if mainRenderConnection then
+                mainRenderConnection:Disconnect()
+                mainRenderConnection = nil
+            end
+            
+            if input.UserInputType == Enum.UserInputType.Touch then
+                unblockCamera()
+            end
         end
     end)
-    
-    local function updateIcon(input)
-        local delta = input.Position - dragStartIcon
-        IconBtn.Position = UDim2.new(
-            startPosIcon.X.Scale,
-            startPosIcon.X.Offset + delta.X,
-            startPosIcon.Y.Scale,
-            startPosIcon.Y.Offset + delta.Y
-        )
-    end
     
     IconBtn.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or 
            input.UserInputType == Enum.UserInputType.Touch then
+            if input.UserInputType == Enum.UserInputType.Touch then
+                blockCamera()
+            end
+            
+            local mousePos = UserInputService:GetMouseLocation()
+            local elementPos = IconBtn.AbsolutePosition
+            iconDragOffset = Vector2.new(mousePos.X - elementPos.X, mousePos.Y - elementPos.Y)
+            
             draggingIcon = true
-            dragStartIcon = input.Position
-            startPosIcon = IconBtn.Position
-        end
-    end)
-    
-    UserInputService.InputChanged:Connect(function(input)
-        if draggingIcon and (input.UserInputType == Enum.UserInputType.MouseMovement or
-           input.UserInputType == Enum.UserInputType.Touch) then
-            updateIcon(input)
+            
+            if not iconRenderConnection then
+                iconRenderConnection = RunService.RenderStepped:Connect(updateIconPosition)
+            end
         end
     end)
     
     IconBtn.InputEnded:Connect(function(input)
+        if (input.UserInputType == Enum.UserInputType.MouseButton1 or 
+            input.UserInputType == Enum.UserInputType.Touch) and draggingIcon then
+            draggingIcon = false
+            
+            if iconRenderConnection then
+                iconRenderConnection:Disconnect()
+                iconRenderConnection = nil
+            end
+            
+            if input.UserInputType == Enum.UserInputType.Touch then
+                unblockCamera()
+            end
+        end
+    end)
+    
+    UserInputService.InputEnded:Connect(function(input)
+        if draggingMain and (input.UserInputType == Enum.UserInputType.MouseButton1 or 
+           input.UserInputType == Enum.UserInputType.Touch) then
+            draggingMain = false
+            
+            if mainRenderConnection then
+                mainRenderConnection:Disconnect()
+                mainRenderConnection = nil
+            end
+            
+            if input.UserInputType == Enum.UserInputType.Touch then
+                unblockCamera()
+            end
+        end
+        
         if draggingIcon and (input.UserInputType == Enum.UserInputType.MouseButton1 or 
            input.UserInputType == Enum.UserInputType.Touch) then
             draggingIcon = false
+            
+            if iconRenderConnection then
+                iconRenderConnection:Disconnect()
+                iconRenderConnection = nil
+            end
+            
+            if input.UserInputType == Enum.UserInputType.Touch then
+                unblockCamera()
+            end
         end
     end)
 
@@ -174,9 +263,19 @@ function BdevLib:CreateWindow(options)
     IconBtn.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or 
            input.UserInputType == Enum.UserInputType.Touch then
-                
             local startTime = tick()
             local startPos = input.Position
+            local wasDragged = false
+            
+            local function onInputChanged()
+                if not wasDragged then
+                    local currentPos = UserInputService:GetMouseLocation()
+                    local distance = (currentPos - startPos).Magnitude
+                    if distance > 5 then
+                        wasDragged = true
+                    end
+                end
+            end
             
             local connection
             connection = input.Changed:Connect(function()
@@ -184,12 +283,12 @@ function BdevLib:CreateWindow(options)
                     connection:Disconnect()
                     
                     local endTime = tick()
-                    local endPos = input.Position
-                    local distance = (endPos - startPos).Magnitude
                     
-                    if (endTime - startTime < 0.3) and (distance < 5) then
+                    if (endTime - startTime < 0.3) and not wasDragged then
                         toggleMenu()
                     end
+                else
+                    onInputChanged()
                 end
             end)
         end
@@ -258,18 +357,57 @@ function BdevLib:CreateWindow(options)
             end
         end
         
+        local function animateButtonColor()
+            local originalColor = Color3.fromRGB(255, 255, 255)
+            local greenColor = Color3.fromRGB(50, 255, 50)
+            
+            local toGreenTween = TweenService:Create(
+                ClickBtn,
+                TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+                {BackgroundColor3 = greenColor}
+            )
+            
+            local toWhiteTween = TweenService:Create(
+                ClickBtn,
+                TweenInfo.new(0.7, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+                {BackgroundColor3 = originalColor}
+            )
+            
+            toGreenTween:Play()
+            
+            wait(2.5)
+            
+            toWhiteTween:Play()
+        end
+        
         ClickBtn.InputBegan:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.MouseButton1 or 
                input.UserInputType == Enum.UserInputType.Touch then
-                ClickBtn.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+                if input.UserInputType == Enum.UserInputType.Touch then
+                    blockCamera()
+                end
+                
+                local callbackCalled = false
+                local animationStarted = false
                 
                 local connection
                 connection = input.Changed:Connect(function()
                     if input.UserInputState == Enum.UserInputState.End then
                         connection:Disconnect()
                         
-                        ClickBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                        handleButtonClick()
+                        if not animationStarted then
+                            animationStarted = true
+                            task.spawn(animateButtonColor)
+                        end
+                        
+                        if not callbackCalled then
+                            callbackCalled = true
+                            handleButtonClick()
+                        end
+                        
+                        if input.UserInputType == Enum.UserInputType.Touch then
+                            unblockCamera()
+                        end
                     end
                 end)
             end
@@ -279,7 +417,21 @@ function BdevLib:CreateWindow(options)
         
         return {
             Button = Button,
-            Click = ClickBtn
+            Click = ClickBtn,
+            SetColor = function(color)
+                local tween = TweenService:Create(
+                    ClickBtn,
+                    TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+                    {BackgroundColor3 = color}
+                )
+                tween:Play()
+            end,
+            FlashGreen = function()
+                animateButtonColor()
+            end,
+            FlashRed = function()
+                animateButtonColor()
+            end
         }
     end
 
@@ -305,7 +457,7 @@ function BdevLib:CreateWindow(options)
         Tbutton.BorderSizePixel = 0
         Tbutton.Position = UDim2.new(0, 0, 0, currentYOffset)
         Tbutton.Size = UDim2.new(0, 192, 0, 17)
-        
+
         UIListLayout.Parent = Tbutton
         UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
         UIListLayout.Padding = UDim.new(0, 8)
@@ -345,12 +497,13 @@ function BdevLib:CreateWindow(options)
         Circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
         Circle.BorderColor3 = Color3.fromRGB(0, 0, 0)
         Circle.BorderSizePixel = 0
-        Circle.Size = UDim2.new(0, 16, 0, 16)  
+        Circle.Size = UDim2.new(0, 16, 0, 16)
+        
         Circle.Position = toggled and UDim2.new(0.59, 0, 0, 0) or UDim2.new(0.025, 0, 0, 0)
 
         UICorner_5.CornerRadius = UDim.new(1, 2)
         UICorner_5.Parent = Circle
-        
+
         NameFunction.Name = "NameFunction"
         NameFunction.Parent = ToggleBtn
         NameFunction.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -406,15 +559,20 @@ function BdevLib:CreateWindow(options)
         ToggleBtn.InputBegan:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.MouseButton1 or 
                input.UserInputType == Enum.UserInputType.Touch then
-                ToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+                if input.UserInputType == Enum.UserInputType.Touch then
+                    blockCamera()
+                end
                 
                 local connection
                 connection = input.Changed:Connect(function()
                     if input.UserInputState == Enum.UserInputState.End then
                         connection:Disconnect()
                         
-                        ToggleBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
                         toggleFunction()
+                        
+                        if input.UserInputType == Enum.UserInputType.Touch then
+                            unblockCamera()
+                        end
                     end
                 end)
             end
