@@ -185,14 +185,14 @@ function BdevLib:CreateWindow(options)
         Main.Visible = isOpen
     end)
 
-    -- Счетчик для LayoutOrder
-    local elementCount = 0
+    -- Счетчик для Y-позиции (будем увеличивать при создании новых элементов)
+    local currentYOffset = 8
 
     -- Функция для создания кнопки
     function window:CreateButton(options)
-        elementCount = elementCount + 1
-        
         local Button = Instance.new("Frame")
+        local UIListLayout_2 = Instance.new("UIListLayout")
+        local UIPadding_2 = Instance.new("UIPadding")
         local ClickBtn = Instance.new("TextButton")
         local UICorner_6 = Instance.new("UICorner")
         local FunText = Instance.new("TextLabel")
@@ -203,8 +203,16 @@ function BdevLib:CreateWindow(options)
         Button.BackgroundTransparency = 1.000
         Button.BorderColor3 = Color3.fromRGB(0, 0, 0)
         Button.BorderSizePixel = 0
+        Button.Position = UDim2.new(0.00420162221, 0, 0, currentYOffset)
         Button.Size = UDim2.new(0, 192, 0, 27)
-        Button.LayoutOrder = elementCount
+
+        -- UIListLayout внутри Button (из твоего кода)
+        UIListLayout_2.Parent = Button
+        UIListLayout_2.SortOrder = Enum.SortOrder.LayoutOrder
+        UIListLayout_2.Padding = UDim.new(0, 8)
+
+        UIPadding_2.Parent = Button
+        UIPadding_2.PaddingLeft = UDim.new(0.800000012, -12)
 
         ClickBtn.Name = "ClickBtn"
         ClickBtn.Parent = Button
@@ -221,7 +229,7 @@ function BdevLib:CreateWindow(options)
         UICorner_6.CornerRadius = UDim.new(1, 0)
         UICorner_6.Parent = ClickBtn
 
-        -- Текст кнопки
+        -- Текст кнопки с точными позициями из твоего кода
         FunText.Name = "FunText"
         FunText.Parent = ClickBtn
         FunText.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -245,14 +253,17 @@ function BdevLib:CreateWindow(options)
             end
         end)
         
+        -- Увеличиваем Y-позицию для следующего элемента
+        currentYOffset = currentYOffset + 35
+        
         return Button
     end
 
     -- Функция для создания переключателя
     function window:CreateToggle(options)
-        elementCount = elementCount + 1
-        
         local Tbutton = Instance.new("Frame")
+        local UIListLayout = Instance.new("UIListLayout")
+        local UIPadding = Instance.new("UIPadding")
         local ToggleBtn = Instance.new("TextButton")
         local UICorner_3 = Instance.new("UICorner")
         local Background = Instance.new("Frame")
@@ -269,8 +280,16 @@ function BdevLib:CreateWindow(options)
         Tbutton.BackgroundTransparency = 1.000
         Tbutton.BorderColor3 = Color3.fromRGB(0, 0, 0)
         Tbutton.BorderSizePixel = 0
+        Tbutton.Position = UDim2.new(0, 0, 0, currentYOffset)
         Tbutton.Size = UDim2.new(0, 192, 0, 17)
-        Tbutton.LayoutOrder = elementCount
+
+        -- UIListLayout внутри Tbutton (из твоего кода)
+        UIListLayout.Parent = Tbutton
+        UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        UIListLayout.Padding = UDim.new(0, 8)
+
+        UIPadding.Parent = Tbutton
+        UIPadding.PaddingLeft = UDim.new(0.800000012, -12)
 
         ToggleBtn.Name = "ToggleBtn"
         ToggleBtn.Parent = Tbutton
@@ -311,7 +330,7 @@ function BdevLib:CreateWindow(options)
         UICorner_5.CornerRadius = UDim.new(1, 2)
         UICorner_5.Parent = Circle
 
-        -- Текст переключателя
+        -- Текст переключателя с точными позициями из твоего кода
         NameFunction.Name = "NameFunction"
         NameFunction.Parent = ToggleBtn
         NameFunction.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -347,6 +366,9 @@ function BdevLib:CreateWindow(options)
             toggled = not toggled
             updateToggle()
         end)
+        
+        -- Увеличиваем Y-позицию для следующего элемента
+        currentYOffset = currentYOffset + 25
         
         return Tbutton
     end
