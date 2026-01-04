@@ -191,12 +191,6 @@ function BdevLib:CreateWindow(options)
     IconBtn.MouseButton1Click:Connect(toggleMenu)
     
     -- Для сенсора: простое нажатие-отпускание
-    IconBtn.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.Touch then
-            -- Начинаем отслеживать
-        end
-    end)
-    
     IconBtn.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.Touch and not draggingIcon then
             toggleMenu()
@@ -271,25 +265,14 @@ function BdevLib:CreateWindow(options)
             end
         end
         
-        -- ОЧЕНЬ ВАЖНО: Разные обработчики для ПК и мобильных
-        
-        -- Для ПК: MouseButton1Click (самый надежный способ)
+        -- Для ПК: MouseButton1Click
         ClickBtn.MouseButton1Click:Connect(handleButtonClick)
         
-        -- Для мобильных: простой тап без сложных проверок
-        ClickBtn.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.Touch then
-                -- Визуальная обратная связь
-                ClickBtn.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
-            end
-        end)
-        
+        -- Для мобильных: простой тап
         ClickBtn.InputEnded:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.Touch then
                 -- Вызываем callback
                 handleButtonClick()
-                -- Возвращаем цвет
-                ClickBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
             end
         end)
         
@@ -430,25 +413,14 @@ function BdevLib:CreateWindow(options)
             updateToggle()
         end
 
-        -- ОЧЕНЬ ВАЖНО: Разные обработчики для ПК и мобильных
-        
-        -- Для ПК: MouseButton1Click (самый надежный способ)
+        -- ПРОСТОЙ ОБРАБОТЧИК КЛИКА - только это
         ToggleBtn.MouseButton1Click:Connect(toggleFunction)
         
-        -- Для мобильных: простой тап без сложных проверок
-        ToggleBtn.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.Touch then
-                -- Визуальная обратная связь
-                ToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
-            end
-        end)
-        
+        -- Для мобильных: также простой тап
         ToggleBtn.InputEnded:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.Touch then
                 -- Переключаем
                 toggleFunction()
-                -- Возвращаем цвет
-                ToggleBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
             end
         end)
         
