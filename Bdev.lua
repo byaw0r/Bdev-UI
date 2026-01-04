@@ -20,6 +20,8 @@ function BdevLib:CreateWindow(options)
     local Dev = Instance.new("Frame")
     local TextLabel = Instance.new("TextLabel")
     local Window = Instance.new("Frame")
+    local UIListLayout = Instance.new("UIListLayout")
+    local UIPadding = Instance.new("UIPadding")
     local IconBtn = Instance.new("ImageButton")
     local UICorner_7 = Instance.new("UICorner")
 
@@ -80,6 +82,13 @@ function BdevLib:CreateWindow(options)
     Window.BorderSizePixel = 0
     Window.Position = UDim2.new(0, 0, 0.15289256, 0)
     Window.Size = UDim2.new(0, 193, 0, 205)
+    
+    UIListLayout.Parent = Window
+    UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    UIListLayout.Padding = UDim.new(0, 8)
+    
+    UIPadding.Parent = Window
+    UIPadding.PaddingTop = UDim.new(0, 10)
 
     IconBtn.Name = "IconBtn"
     IconBtn.Parent = BdevUI
@@ -92,6 +101,42 @@ function BdevLib:CreateWindow(options)
 
     UICorner_7.CornerRadius = UDim.new(1.5, 0)
     UICorner_7.Parent = IconBtn
+
+    local elementCount = 0
+    local topBarHeight = 37
+    local paddingTop = 10
+    local minPadding = 20
+    local buttonHeight = 27
+    local toggleHeight = 17
+    local spacing = 8
+    
+    local function updateWindowSize()
+        local totalElementsHeight = 0
+        local childCount = 0
+        
+        for _, child in ipairs(Window:GetChildren()) do
+            if child:IsA("Frame") and (child.Name == "Button" or child.Name == "Tbutton") then
+                totalElementsHeight = totalElementsHeight + (child.Name == "Button" and buttonHeight or toggleHeight)
+                childCount = childCount + 1
+            end
+        end
+        
+        if childCount > 0 then
+            totalElementsHeight = totalElementsHeight + (spacing * (childCount - 1))
+        end
+        
+        local newWindowHeight = paddingTop + totalElementsHeight + minPadding
+        
+        local minWindowHeight = paddingTop + minPadding
+        newWindowHeight = math.max(minWindowHeight, newWindowHeight)
+        
+        local newMainHeight = topBarHeight + newWindowHeight
+        
+        Main.Size = UDim2.new(0, 193, 0, newMainHeight)
+        Window.Size = UDim2.new(0, 193, 0, newWindowHeight)
+        
+        Window.Position = UDim2.new(0, 0, 0, topBarHeight)
+    end
 
     local draggingMain = false
     local draggingIcon = false
@@ -294,8 +339,6 @@ function BdevLib:CreateWindow(options)
         end
     end)
 
-    local currentYOffset = 8
-
     function window:CreateButton(options)
         local Button = Instance.new("Frame")
         local UIListLayout_2 = Instance.new("UIListLayout")
@@ -310,7 +353,6 @@ function BdevLib:CreateWindow(options)
         Button.BackgroundTransparency = 1.000
         Button.BorderColor3 = Color3.fromRGB(0, 0, 0)
         Button.BorderSizePixel = 0
-        Button.Position = UDim2.new(0.00420162221, 0, 0, currentYOffset)
         Button.Size = UDim2.new(0, 192, 0, 27)
 
         UIListLayout_2.Parent = Button
@@ -351,6 +393,8 @@ function BdevLib:CreateWindow(options)
         FunText.TextSize = 16
         FunText.TextWrapped = true
 
+        elementCount = elementCount + 1
+        
         local function handleButtonClick()
             if options.Callback then
                 options.Callback()
@@ -413,7 +457,7 @@ function BdevLib:CreateWindow(options)
             end
         end)
         
-        currentYOffset = currentYOffset + 35
+        updateWindowSize()
         
         return {
             Button = Button,
@@ -455,7 +499,6 @@ function BdevLib:CreateWindow(options)
         Tbutton.BackgroundTransparency = 1.000
         Tbutton.BorderColor3 = Color3.fromRGB(0, 0, 0)
         Tbutton.BorderSizePixel = 0
-        Tbutton.Position = UDim2.new(0, 0, 0, currentYOffset)
         Tbutton.Size = UDim2.new(0, 192, 0, 17)
 
         UIListLayout.Parent = Tbutton
@@ -519,6 +562,8 @@ function BdevLib:CreateWindow(options)
         NameFunction.TextSize = 16
         NameFunction.TextWrapped = true
 
+        elementCount = elementCount + 1
+        
         local function updateToggle()
             local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
             
@@ -578,7 +623,7 @@ function BdevLib:CreateWindow(options)
             end
         end)
         
-        currentYOffset = currentYOffset + 25
+        updateWindowSize()
         
         return {
             Toggle = Tbutton,
