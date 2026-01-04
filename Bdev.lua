@@ -7,6 +7,8 @@ function BdevLib:CreateWindow(options)
     -- Получаем сервисы
     local UserInputService = game:GetService("UserInputService")
     local TweenService = game:GetService("TweenService")
+    local RunService = game:GetService("RunService")
+    local isMobile = UserInputService.TouchEnabled
     local Players = game:GetService("Players")
     local player = Players.LocalPlayer
     
@@ -101,7 +103,8 @@ function BdevLib:CreateWindow(options)
     local draggingIcon = false
     local dragStartIcon
     local startPosIcon
-    local iconWasClicked = false
+    local iconTouchTime = 0
+    local iconTouchStartPos
 
     -- Функция для перетаскивания главного окна
     local function updateMain(input)
@@ -153,12 +156,17 @@ function BdevLib:CreateWindow(options)
     
     -- Начинаем перетаскивание иконки
     IconBtn.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or 
-           input.UserInputType == Enum.UserInputType.Touch then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
             draggingIcon = true
             dragStartIcon = input.Position
             startPosIcon = IconBtn.Position
-            iconWasClicked = true
+        elseif input.UserInputType == Enum.UserInputType.Touch then
+            -- Для сенсорного ввода отслеживаем время и начальную позицию
+            iconTouchTime = tick()
+            iconTouchStartPos = input.Position
+            draggingIcon = true
+            dragStartIcon = input.Position
+            startPosIcon = IconBtn.Position
         end
     end)
     
@@ -167,22 +175,25 @@ function BdevLib:CreateWindow(options)
         if draggingIcon and (input.UserInputType == Enum.UserInputType.MouseMovement or
            input.UserInputType == Enum.UserInputType.Touch) then
             updateIcon(input)
-            -- Если началось перетаскивание, то это не клик
-            iconWasClicked = false
         end
     end)
     
     -- Завершаем перетаскивание иконки
     IconBtn.InputEnded:Connect(function(input)
-        if draggingIcon and (input.UserInputType == Enum.UserInputType.MouseButton1 or 
-           input.UserInputType == Enum.UserInputType.Touch) then
+        if draggingIcon and (input.UserInputType == Enum.UserInputType.MouseButton1) then
             draggingIcon = false
+        elseif draggingIcon and (input.UserInputType == Enum.UserInputType.Touch) then
+            local touchDuration = tick() - iconTouchTime
+            local touchDistance = (iconTouchStartPos - input.Position).magnitude
             
-            -- Если это был клик (не перетаскивание), открываем/закрываем меню
-            if iconWasClicked then
+            -- Если касание было коротким (менее 0.3 сек) и перемещение небольшое (менее 10 пикселей)
+            -- то это клик, а не свайп
+            if touchDuration < 0.3 and touchDistance < 10 then
+                -- Это клик, открываем/закрываем меню
                 toggleMenu()
             end
-            iconWasClicked = false
+            
+            draggingIcon = false
         end
     end)
 
@@ -194,6 +205,9 @@ function BdevLib:CreateWindow(options)
         isOpen = not isOpen
         Main.Visible = isOpen
     end
+    
+    -- Обработчик клика для иконки (только для мыши)
+    IconBtn.MouseButton1Click:Connect(toggleMenu)
 
     -- Счетчик для Y-позиции (будем увеличивать при создании новых элементов)
     local currentYOffset = 8
@@ -306,6 +320,9 @@ function BdevLib:CreateWindow(options)
         local NameFunction = Instance.new("TextLabel")
 
         local toggled = options.Default or false
+        local toggleTouchStartTime = 0
+        local toggleTouchStartPos
+        local toggleDragging = false
 
         Tbutton.Name = "Tbutton"
         Tbutton.Parent = Window
@@ -420,23 +437,49 @@ function BdevLib:CreateWindow(options)
             updateToggle()
         end
 
-        -- ПРОСТОЙ ОБРАБОТЧИК КЛИКА
+        -- Для ПК: простой клик
         ToggleBtn.MouseButton1Click:Connect(toggleFunction)
         
-        -- Для мобильных: также простой тап
+        -- Для мобильных: обрабатываем тапы
         ToggleBtn.InputBegan:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.Touch then
+                -- Запоминаем время и позицию начала касания
+                toggleTouchStartTime = tick()
+                toggleTouchStartPos = input.Position
+                toggleDragging = false
+                
                 -- Визуальная обратная связь
                 ToggleBtn.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
             end
         end)
         
+        -- Обрабатываем изменение позиции (для определения свайпа)
+        ToggleBtn.InputChanged:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.Touch then
+                if toggleTouchStartPos then
+                    local distance = (input.Position - toggleTouchStartPos).magnitude
+                    if distance > 5 then -- Если переместили более чем на 5 пикселей
+                        toggleDragging = true
+                    end
+                end
+            end
+        end)
+        
         ToggleBtn.InputEnded:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.Touch then
-                -- Переключаем
-                toggleFunction()
+                local touchDuration = tick() - toggleTouchStartTime
+                
+                -- Если это был короткий тап (менее 0.3 сек) и не было свайпа
+                if touchDuration < 0.3 and not toggleDragging then
+                    toggleFunction()
+                end
+                
                 -- Возвращаем цвет
                 ToggleBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                
+                -- Сбрасываем флаги
+                toggleDragging = false
+                toggleTouchStartPos = nil
             end
         end)
         
