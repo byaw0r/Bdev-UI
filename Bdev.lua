@@ -243,7 +243,7 @@ function BdevLib:CreateWindow(options)
         ClickBtn.Text = ""
         ClickBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
         ClickBtn.TextSize = 14.000
-        ClickBtn.AutoButtonColor = true  -- ВКЛЮЧАЕМ стандартное поведение кнопки!
+        ClickBtn.AutoButtonColor = true
 
         UICorner_6.CornerRadius = UDim.new(1, 0)
         UICorner_6.Parent = ClickBtn
@@ -343,7 +343,7 @@ function BdevLib:CreateWindow(options)
         ToggleBtn.Text = ""
         ToggleBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
         ToggleBtn.TextSize = 14.000
-        ToggleBtn.AutoButtonColor = true  -- ВКЛЮЧАЕМ стандартное поведение!
+        ToggleBtn.AutoButtonColor = true
 
         UICorner_3.CornerRadius = UDim.new(1, 2)
         UICorner_3.Parent = ToggleBtn
